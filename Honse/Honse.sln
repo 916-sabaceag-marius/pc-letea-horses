@@ -32,6 +32,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honse.Global", "Honse.Globa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honse.Web", "Honse.Web\Honse.Web.csproj", "{0C16E41E-C0BA-4E05-8A35-5556384D3916}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honse.ConsoleTest", "Honse.ConsoleTest\Honse.ConsoleTest.csproj", "{2EB30545-5F4C-4700-8ED5-7481ED84D4EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honse.Tests", "Honse.Tests\Honse.Tests.csproj", "{4CFBDC90-72F7-4A03-89BE-1724E6CBA95F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +66,14 @@ Global
 		{0C16E41E-C0BA-4E05-8A35-5556384D3916}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C16E41E-C0BA-4E05-8A35-5556384D3916}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C16E41E-C0BA-4E05-8A35-5556384D3916}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EB30545-5F4C-4700-8ED5-7481ED84D4EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EB30545-5F4C-4700-8ED5-7481ED84D4EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EB30545-5F4C-4700-8ED5-7481ED84D4EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EB30545-5F4C-4700-8ED5-7481ED84D4EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CFBDC90-72F7-4A03-89BE-1724E6CBA95F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CFBDC90-72F7-4A03-89BE-1724E6CBA95F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CFBDC90-72F7-4A03-89BE-1724E6CBA95F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CFBDC90-72F7-4A03-89BE-1724E6CBA95F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
