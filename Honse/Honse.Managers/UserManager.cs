@@ -3,45 +3,103 @@ using Honse.Global;
 using Honse.Global.Extensions;
 using Honse.Managers.Interface;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace Honse.Managers
 {
-    public class UserManager : Interface.IUserManager
+    public class UserManager : IUserManager
     {
         private readonly UserManager<User> userManager;
         private readonly IConfiguration configuration;
         private readonly SignInManager<User> signInManager;
 
-        public UserManager(UserManager<Global.User> userManager,
+        public UserManager(UserManager<User> userManager,
         IConfiguration configuration,
-        SignInManager<Global.User> signInManager)
+        SignInManager<User> signInManager)
         {
             this.userManager = userManager;
             this.configuration = configuration;
             this.signInManager = signInManager;
         }
 
-        public Task<UserAuthenticationResponse> Login(UserRegisterRequest request)
+        public async Task<UserAuthenticationResponse> Login(UserLoginRequest request)
         {
+            //TODO: Add validation
 
-            throw new NotImplementedException();
+            User? user = await userManager.Users.FirstOrDefaultAsync(x => x.UserName == request.UserName || x.Email == request.UserName);
+
+            if (user == null)
+            {
+                throw new Exception("Invalid username or password!");
+            }
+
+            SignInResult result = await signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+
+            if (!result.Succeeded)
+            {
+                throw new Exception("Invalid username or password!");
+            }
+
+            return new UserAuthenticationResponse
+            {
+                Token = CreateToken(user),
+                Succeeded = true,
+                Username = user.UserName
+            };
         }
 
         public async Task<UserAuthenticationResponse> Register(UserRegisterRequest request)
         {
             //TODO: Add validation
 
-            Global.User user = request.DeepCopyTo<Global.User>();
+            User user = request.DeepCopyTo<User>();
 
-            var createdUser = await userManager.CreateAsync(user, request.Password);
+            IdentityResult createdUser = await userManager.CreateAsync(user, request.Password);
 
             if (!createdUser.Succeeded)
             {
-                throw new Exception(createdUser.Errors.Aggregate());
+                throw new Exception(string.Join("\n", createdUser.Errors.Select(e => e.Description)));
             }
 
-            throw new NotImplementedException();
+            return new UserAuthenticationResponse
+            {
+                Succeeded = true,
+                Username = user.UserName,
+                Token = CreateToken(user)
+            };
+        }
+
+        private string CreateToken(User user)
+        {
+            List<Claim> claims = new List<Claim>
+            {
+                new(JwtRegisteredClaimNames.Email, user.Email),
+                new(JwtRegisteredClaimNames.GivenName, user.UserName),
+            };
+
+            SigningCredentials credentials = new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:SigningKey"])),
+                SecurityAlgorithms.HmacSha512);
+
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddDays(7),
+                SigningCredentials = credentials,
+                Issuer = configuration["JWT:Issuer"],
+                Audience = configuration["JWT:Audience"]
+            };
+
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
         }
     }
 }

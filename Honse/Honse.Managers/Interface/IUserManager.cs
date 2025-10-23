@@ -6,7 +6,7 @@ namespace Honse.Managers.Interface
     {
         public Task<UserAuthenticationResponse> Register(UserRegisterRequest request);
 
-        public Task<UserAuthenticationResponse> Login(UserRegisterRequest request);
+        public Task<UserAuthenticationResponse> Login(UserLoginRequest request);
 
     }
 
@@ -31,10 +31,10 @@ namespace Honse.Managers.Interface
 
     public class UserAuthenticationResponse
     {
-        public required bool Succeeded { get; set; }
+        public bool Succeeded { get; set; }
 
-        public required string Token { get; set; }
+        public string Token { get; set; }
 
-        public required string Username { get; set; }
+        public string Username { get; set; }
     }
 }

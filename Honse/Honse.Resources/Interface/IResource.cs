@@ -1,4 +1,7 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Honse.Resources.Interface
 {
     public interface IResource<T> where T : Entity
@@ -16,8 +19,10 @@ namespace Honse.Resources.Interface
 
     public abstract class Entity
     {
+        [Key]
         public Guid Id { get; set; }
 
+        [ForeignKey("User")]
         public Guid UserId { get; set; }
     }
 }
