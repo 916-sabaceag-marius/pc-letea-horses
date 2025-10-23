@@ -1,7 +1,7 @@
 ﻿using Honse.Resources.Interface;
 using Microsoft.EntityFrameworkCore;
 
-namespace Honse.Resources
+namespace Honse.Resources.Common
 {
     public abstract class Resource<T> : IResource<T> where T : Entity
     {

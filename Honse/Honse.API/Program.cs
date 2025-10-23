@@ -1,4 +1,4 @@
-using Honse.Resources;
+using Honse.Resources.Common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
