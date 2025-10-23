@@ -2,7 +2,7 @@
 
 namespace Honse.Resources.Interface
 {
-    public interface IProductResource : IResource<Product>
+    public interface IProductResource : IFilterResource<Product>
     {
 
     }
@@ -20,6 +20,9 @@ namespace Honse.Resources.Interface
         public string Image { get; set; } = string.Empty;
 
         //[ForeignKey("Category")]
+        [NotMapped]
         public Guid CategoryId { get; set; }
+
+        public bool IsEnabled { get; set; } = true;
     }
 }

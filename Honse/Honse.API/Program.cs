@@ -79,7 +79,7 @@ builder.Services.AddIdentity<Honse.Global.User, IdentityRole<Guid>>(options =>
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-//Auth
+//Authentication
 
 builder.Services.AddAuthentication(options =>
 {
@@ -102,7 +102,15 @@ builder.Services.AddAuthentication(options =>
 
 // Dependency Injection
 
+// Resources
+builder.Services.AddScoped<Honse.Resources.Interface.IProductResource, Honse.Resources.ProductResource>();
+
+// Engines
+builder.Services.AddScoped<Honse.Engines.Interface.IUserValidationEngine, Honse.Engines.User.UserValidationEngine>();
+
+// Managers
 builder.Services.AddScoped<Honse.Managers.Interface.IUserManager, Honse.Managers.UserManager>();
+builder.Services.AddScoped<Honse.Managers.Interface.IProductManager, Honse.Managers.ProductManager>();
 
 var app = builder.Build();
 

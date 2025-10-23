@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Honse.Resources.Interface
 {
     public interface IFilterResource<T> : IResource<T> where T : Entity

@@ -1,4 +1,5 @@
 ﻿
+using Honse.Engines.Interface;
 using Honse.Global;
 using Honse.Global.Extensions;
 using Honse.Managers.Interface;
@@ -17,19 +18,32 @@ namespace Honse.Managers
         private readonly UserManager<User> userManager;
         private readonly IConfiguration configuration;
         private readonly SignInManager<User> signInManager;
+        private readonly IUserValidationEngine userValidationEngine;
 
         public UserManager(UserManager<User> userManager,
         IConfiguration configuration,
-        SignInManager<User> signInManager)
+        SignInManager<User> signInManager,
+        Engines.Interface.IUserValidationEngine userValidationEngine)
         {
             this.userManager = userManager;
             this.configuration = configuration;
             this.signInManager = signInManager;
+            this.userValidationEngine = userValidationEngine;
+        }
+
+        public async Task<User> GetUserByName(string userName)
+        {
+            User? user = await userManager.FindByNameAsync(userName);
+
+            if (user == null)
+                throw new Exception("User not found!");
+
+            return user;
         }
 
         public async Task<UserAuthenticationResponse> Login(UserLoginRequest request)
         {
-            //TODO: Add validation
+            userValidationEngine.ValidateLogin(request.DeepCopyTo<Engines.User.UserLogin>());
 
             User? user = await userManager.Users.FirstOrDefaultAsync(x => x.UserName == request.UserName || x.Email == request.UserName);
 
@@ -55,7 +69,7 @@ namespace Honse.Managers
 
         public async Task<UserAuthenticationResponse> Register(UserRegisterRequest request)
         {
-            //TODO: Add validation
+            userValidationEngine.ValidateRegister(request.DeepCopyTo<Engines.User.UserRegister>());
 
             User user = request.DeepCopyTo<User>();
 

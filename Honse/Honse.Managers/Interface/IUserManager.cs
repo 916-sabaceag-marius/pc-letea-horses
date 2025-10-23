@@ -8,13 +8,13 @@ namespace Honse.Managers.Interface
 
         public Task<UserAuthenticationResponse> Login(UserLoginRequest request);
 
+        public Task<Global.User> GetUserByName(string userName);
     }
 
     public class UserRegisterRequest
     {
         public string UserName { get; set; }
 
-        [EmailAddress]
         public string Email { get; set; }
 
         public string Password { get; set; }
