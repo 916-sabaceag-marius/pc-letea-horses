@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Honse.Resources.Common
+namespace Honse.Resources.Interfaces
 {
     public class AppDbContext : IdentityDbContext<Global.User, IdentityRole<Guid>, Guid>
     {
-        public DbSet<Interface.Product> Products { get; set; }
-        public DbSet<Interface.ProductCategory> ProductCategories { get; set; }
+        public DbSet<Entities.Product> Product { get; set; }
+        public DbSet<Entities.ProductCategory> ProductCategory { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> context) : base(context)
         {

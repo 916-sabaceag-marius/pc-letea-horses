@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Honse.Managers.Interface
+namespace Honse.Managers.Interfaces
 {
     public interface IUserManager
     {

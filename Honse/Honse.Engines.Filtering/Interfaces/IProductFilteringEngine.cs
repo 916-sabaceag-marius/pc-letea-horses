@@ -4,7 +4,7 @@ namespace Honse.Engines.Filtering.Interfaces
 {
     public interface IProductFilteringEngine
     {
-        Specification<Resources.Interface.Product> ToSpecification(ProductFilterRequest filter);
+        Specification<Resources.Interfaces.Entities.Product> GetSpecification(ProductFilterRequest filter);
     }
 
     public class ProductFilterRequest

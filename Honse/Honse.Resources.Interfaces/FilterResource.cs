@@ -1,17 +1,16 @@
 ﻿using Honse.Global.Specification;
-using Honse.Resources.Interface;
 using Microsoft.EntityFrameworkCore;
 
-namespace Honse.Resources.Common
+namespace Honse.Resources.Interfaces
 {
-    public class FilterResource<T> : Resource<T>, IFilterResource<T> where T : Entity
+    public class FilterResource<T> : Resource<T>, IFilterResource<T> where T : Entities.Entity
     {
         public FilterResource(AppDbContext appDbContext) : base(appDbContext)
         {
             
         }
 
-        public async Task<PaginatedResult<T>> Filter(Specification<T> specification, int pageSize, int pageNumber)
+        public async Task<Global.PaginatedResult<T>> Filter(Specification<T> specification, int pageSize, int pageNumber)
         {
             List<T> entities = await dbSet
             .Where(specification.Expression)
@@ -21,7 +20,7 @@ namespace Honse.Resources.Common
 
             int count = await dbSet.Where(specification.Expression).CountAsync();
 
-            return new PaginatedResult<T>
+            return new Global.PaginatedResult<T>
             {
                 Result = entities,
                 PageNumber = pageNumber,

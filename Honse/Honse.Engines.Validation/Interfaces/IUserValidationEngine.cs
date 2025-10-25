@@ -1,5 +1,5 @@
 ﻿
-namespace Honse.Engines.Validation.Interface
+namespace Honse.Engines.Validation.Interfaces
 {
     public interface IUserValidationEngine
     {

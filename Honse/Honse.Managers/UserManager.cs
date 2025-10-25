@@ -1,6 +1,6 @@
 ﻿using Honse.Global;
 using Honse.Global.Extensions;
-using Honse.Managers.Interface;
+using Honse.Managers.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,12 +16,12 @@ namespace Honse.Managers
         private readonly UserManager<User> userManager;
         private readonly IConfiguration configuration;
         private readonly SignInManager<User> signInManager;
-        private readonly Engines.Validation.Interface.IUserValidationEngine userValidationEngine;
+        private readonly Engines.Validation.Interfaces.IUserValidationEngine userValidationEngine;
 
         public UserManager(UserManager<User> userManager,
         IConfiguration configuration,
         SignInManager<User> signInManager,
-        Engines.Validation.Interface.IUserValidationEngine userValidationEngine)
+        Engines.Validation.Interfaces.IUserValidationEngine userValidationEngine)
         {
             this.userManager = userManager;
             this.configuration = configuration;

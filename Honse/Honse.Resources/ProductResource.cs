@@ -1,13 +1,12 @@
-﻿using Honse.Resources.Common;
-using Honse.Resources.Interface;
+﻿using Honse.Resources.Interfaces;
 
 namespace Honse.Resources
 {
-    public class ProductResource : FilterResource<Product>, IProductResource
+    public class ProductResource : FilterResource<Interfaces.Entities.Product>, IProductResource
     {
         public ProductResource(AppDbContext dbContext) : base(dbContext)
         {
-            dbSet = dbContext.Products;
+            dbSet = dbContext.Product;
         }
     }
 }

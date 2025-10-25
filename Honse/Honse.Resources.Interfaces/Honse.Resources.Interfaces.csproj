@@ -7,9 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Honse.Engines.Interfaces\Honse.Engines.Common.csproj" />
     <ProjectReference Include="..\Honse.Global\Honse.Global.csproj" />
-    <ProjectReference Include="..\Honse.Resources.Interfaces\Honse.Resources.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

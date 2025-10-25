@@ -1,13 +1,12 @@
-﻿using Honse.Resources.Common;
-using Honse.Resources.Interface;
+﻿using Honse.Resources.Interfaces;
 
 namespace Honse.Resources
 {
-    public class ProductCategoryResource : Resource<ProductCategory>, IProductCategoryResource
+    public class ProductCategoryResource : Resource<Interfaces.Entities.ProductCategory>, IProductCategoryResource
     {
         public ProductCategoryResource(AppDbContext dbContext) : base(dbContext)
         {
-            dbSet = dbContext.ProductCategories;
+            dbSet = dbContext.ProductCategory;
         }
     }
 }

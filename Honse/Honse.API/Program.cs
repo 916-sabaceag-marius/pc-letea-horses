@@ -1,4 +1,3 @@
-using Honse.Resources.Common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -58,7 +57,7 @@ builder.Services.AddSwaggerGen(options =>
 
 // Database
 
-builder.Services.AddDbContext<AppDbContext>(opt
+builder.Services.AddDbContext<Honse.Resources.Interfaces.AppDbContext>(opt
         => opt.UseSqlServer(builder.Configuration.GetConnectionString("DataSource") + 
             builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
 
@@ -76,7 +75,7 @@ builder.Services.AddIdentity<Honse.Global.User, IdentityRole<Guid>>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequiredLength = 4;
 })
-    .AddEntityFrameworkStores<AppDbContext>()
+    .AddEntityFrameworkStores<Honse.Resources.Interfaces.AppDbContext>()
     .AddDefaultTokenProviders();
 
 //Authentication
@@ -103,14 +102,17 @@ builder.Services.AddAuthentication(options =>
 // Dependency Injection
 
 // Resources
-builder.Services.AddScoped<Honse.Resources.Interface.IProductResource, Honse.Resources.ProductResource>();
+builder.Services.AddScoped<Honse.Resources.Interfaces.IProductResource, Honse.Resources.ProductResource>();
+builder.Services.AddScoped<Honse.Resources.Interfaces.IProductCategoryResource, Honse.Resources.ProductCategoryResource>();
 
 // Engines
-builder.Services.AddScoped<Honse.Engines.Interface.IUserValidationEngine, Honse.Engines.User.UserValidationEngine>();
+builder.Services.AddScoped<Honse.Engines.Filtering.Interfaces.IProductFilteringEngine, Honse.Engines.Filtering.Product.ProductFilteringEngine>();
+builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IProductValidationEngine, Honse.Engines.Validation.ProductValidationEngine>();
+builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IUserValidationEngine, Honse.Engines.Validation.UserValidationEngine>();
 
 // Managers
-builder.Services.AddScoped<Honse.Managers.Interface.IUserManager, Honse.Managers.UserManager>();
-builder.Services.AddScoped<Honse.Managers.Interface.IProductManager, Honse.Managers.ProductManager>();
+builder.Services.AddScoped<Honse.Managers.Interfaces.IUserManager, Honse.Managers.UserManager>();
+builder.Services.AddScoped<Honse.Managers.Interfaces.IProductManager, Honse.Managers.ProductManager>();
 
 var app = builder.Build();
 

@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace Honse.Engines.Filtering.Product
 {
-    internal class SpecificationProductHasUser : Specification<Common.Product>
+    internal class SpecificationProductHasUser : Specification<Resources.Interfaces.Entities.Product>
     {
         private readonly Guid userId;
 
@@ -13,7 +13,7 @@ namespace Honse.Engines.Filtering.Product
             this.userId = userId;
         }
 
-        public override Expression<Func<Common.Product, bool>> Expression =>
-            (Common.Product product) => product.UserId == userId;
+        public override Expression<Func<Resources.Interfaces.Entities.Product, bool>> Expression =>
+            (Resources.Interfaces.Entities.Product product) => product.UserId == userId;
     }
 }

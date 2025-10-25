@@ -1,7 +1,7 @@
-﻿using Honse.Engines.Validation.Interface;
+﻿using Honse.Engines.Validation.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
-namespace Honse.Engines.Validation.User
+namespace Honse.Engines.Validation
 {
     public class UserValidationEngine : IUserValidationEngine
     {
@@ -23,7 +23,7 @@ namespace Honse.Engines.Validation.User
         {
             string errorMessage = "";
 
-            ValidationContext validationContext = new ValidationContext(user) { MemberName = nameof(UserRegister.Email) };
+            ValidationContext validationContext = new ValidationContext(user) { MemberName = nameof(Common.UserRegister.Email) };
 
             if (!Validator.TryValidateProperty(user.Email, validationContext, new List<ValidationResult>()))
                 errorMessage += "The email is not valid!\n";

@@ -1,5 +1,5 @@
 ﻿using Honse.Global.Extensions;
-using Honse.Managers.Interface;
+using Honse.Managers.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +11,7 @@ namespace Honse.API.Controllers
     {
         private readonly IUserManager userManager;
 
-        public UserController(Managers.Interface.IUserManager userManager)
+        public UserController(Managers.Interfaces.IUserManager userManager)
         {
             this.userManager = userManager;
         }

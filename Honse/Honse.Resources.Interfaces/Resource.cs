@@ -1,9 +1,8 @@
-﻿using Honse.Resources.Interface;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace Honse.Resources.Common
+namespace Honse.Resources.Interfaces
 {
-    public abstract class Resource<T> : IResource<T> where T : Entity
+    public abstract class Resource<T> : IResource<T> where T : Entities.Entity
     {
         private readonly AppDbContext dbContext;
 

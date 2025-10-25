@@ -1,6 +1,7 @@
-﻿using Honse.Global.Extensions;
-using Honse.Managers.Interface;
-using Honse.Resources.Interface;
+﻿
+using Azure;
+using Honse.Global.Extensions;
+using Honse.Managers.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -11,13 +12,13 @@ namespace Honse.API.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
+        private readonly IProductManager productManager;
         private readonly IUserManager userManager;
-        private readonly IProductResource productResource;
 
-        public ProductController(Managers.Interface.IUserManager userManager, Resources.Interface.IProductResource productResource)
+        public ProductController(Managers.Interfaces.IProductManager productManager, Managers.Interfaces.IUserManager userManager)
         {
+            this.productManager = productManager;
             this.userManager = userManager;
-            this.productResource = productResource;
         }
 
         [Authorize]
@@ -46,21 +47,19 @@ namespace Honse.API.Controllers
 
             Global.User user = userResponse.Result;
 
-            try
+            var productResponse = await productManager.GetProductById(id, user.Id).WithTryCatch();
+
+            if (!userResponse.IsSuccessfull)
             {
-                Resources.Interface.Product? response = await productResource.GetById(id, user.Id);
-                
-                return Ok(response);
+                return BadRequest(productResponse.Exception.Message);
             }
-            catch(Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+
+            return Ok(productResponse.Result);
         }
 
         [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> CreateEvent([FromBody] Managers.Interface.Product request)
+        [HttpGet]
+        public async Task<IActionResult> GetFilteredProducts([FromQuery] Managers.Interfaces.ProductFilterRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -84,20 +83,123 @@ namespace Honse.API.Controllers
             Global.User user = userResponse.Result;
 
             request.UserId = user.Id;
-            request.Id = Guid.NewGuid();
 
-            try
-            {
-                Resources.Interface.Product? response = await productResource.Add(request.DeepCopyTo<Resources.Interface.Product>());
+            var productResponse = await productManager.FilterProducts(request).WithTryCatch();
 
-                return CreatedAtAction(nameof(GetProduct), new { id = response.Id }, response);
-            }
-            catch (Exception ex)
+            if (!userResponse.IsSuccessfull)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(productResponse.Exception.Message);
             }
 
+            return Ok(productResponse.Result);
+        }
 
+        [Authorize]
+        [HttpGet]
+        [Route("all")]
+        public async Task<IActionResult> GetAllProducts()
+        {
+            if (!ModelState.IsValid)
+            {
+                string errorMessage = ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .First()
+                    .ErrorMessage;
+
+                return BadRequest((new { errorMessage }));
+            }
+
+            string? userName = User.FindFirstValue(ClaimTypes.GivenName);
+
+            var userResponse = await userManager.GetUserByName(userName).WithTryCatch();
+
+            if (!userResponse.IsSuccessfull)
+            {
+                return BadRequest(userResponse.Exception.Message);
+            }
+
+            Global.User user = userResponse.Result;
+
+            var productResponse = await productManager.GetAllProducts(user.Id).WithTryCatch();
+
+            if (!userResponse.IsSuccessfull)
+            {
+                return BadRequest(productResponse.Exception.Message);
+            }
+
+            return Ok(productResponse.Result);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct([FromBody] Managers.Interfaces.CreateProductRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                string errorMessage = ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .First()
+                    .ErrorMessage;
+
+                return BadRequest((new { errorMessage }));
+            }
+
+            string? userName = User.FindFirstValue(ClaimTypes.GivenName);
+
+            var userResponse = await userManager.GetUserByName(userName).WithTryCatch();
+
+            if (!userResponse.IsSuccessfull)
+            {
+                return BadRequest(userResponse.Exception.Message);
+            }
+
+            Global.User user = userResponse.Result;
+
+            request.UserId = user.Id;
+
+            var productResponse = await productManager.AddProduct(request).WithTryCatch();
+
+            if (!productResponse.IsSuccessfull)
+            {
+                return BadRequest(productResponse.Exception.Message);
+            }
+
+            return Created();
+        }
+
+        [Authorize]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteProduct([FromRoute] Guid id)
+        {
+            if (!ModelState.IsValid)
+            {
+                string errorMessage = ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .First()
+                    .ErrorMessage;
+
+                return BadRequest((new { errorMessage }));
+            }
+
+            string? userName = User.FindFirstValue(ClaimTypes.GivenName);
+
+            var userResponse = await userManager.GetUserByName(userName).WithTryCatch();
+
+            if (!userResponse.IsSuccessfull)
+            {
+                return BadRequest(userResponse.Exception.Message);
+            }
+
+            Global.User user = userResponse.Result;
+
+            var productResponse = await productManager.DeleteProduct(id, user.Id).WithTryCatch();
+
+            if (!userResponse.IsSuccessfull)
+            {
+                return BadRequest(productResponse.Exception.Message);
+            }
+
+            return Ok();
         }
     }
 }

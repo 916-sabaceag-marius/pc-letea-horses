@@ -33,6 +33,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honse.Engines.Validation", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honse.Engines.Filtering", "Honse.Engines.Filtering\Honse.Engines.Filtering.csproj", "{4B7C301C-82AE-4024-AA96-65AA8DFD4CBB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{DFA41455-D85F-4F56-AA9E-990F5C50AC8B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Honse.Resources.Interfaces", "Honse.Resources.Interfaces\Honse.Resources.Interfaces.csproj", "{A67D0C81-4BD3-4A03-8933-617604EFAD80}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,14 +75,20 @@ Global
 		{4B7C301C-82AE-4024-AA96-65AA8DFD4CBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B7C301C-82AE-4024-AA96-65AA8DFD4CBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B7C301C-82AE-4024-AA96-65AA8DFD4CBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A67D0C81-4BD3-4A03-8933-617604EFAD80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A67D0C81-4BD3-4A03-8933-617604EFAD80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A67D0C81-4BD3-4A03-8933-617604EFAD80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A67D0C81-4BD3-4A03-8933-617604EFAD80}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{2A2AEC8E-84CE-455D-9DF1-700F1663FC85} = {DFA41455-D85F-4F56-AA9E-990F5C50AC8B}
 		{31A5B94E-B666-4099-A3CB-0233E6DF2FBE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{0649EF18-BD61-479C-8F0C-07C81C9F4946} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{4B7C301C-82AE-4024-AA96-65AA8DFD4CBB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{A67D0C81-4BD3-4A03-8933-617604EFAD80} = {DFA41455-D85F-4F56-AA9E-990F5C50AC8B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {46CC2C0B-EFA1-4B18-BE0C-A7935CBDA1A2}

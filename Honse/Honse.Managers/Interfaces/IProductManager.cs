@@ -1,5 +1,5 @@
 ﻿
-namespace Honse.Managers.Interface
+namespace Honse.Managers.Interfaces
 {
     public interface IProductManager
     {
@@ -9,11 +9,11 @@ namespace Honse.Managers.Interface
 
         Task<Product> UpdateProduct(UpdateProductRequest request);
 
-        Task<Product> DeleteProduct(Guid id, Guid userId);
+        Task DeleteProduct(Guid id, Guid userId);
 
         Task<List<Product>> GetAllProducts(Guid userId);
 
-        //Task<List<Product>> SearchProducts();
+        Task<Global.PaginatedResult<Product>> FilterProducts(ProductFilterRequest request);
     }
 
     public class Product
@@ -67,5 +67,20 @@ namespace Honse.Managers.Interface
         public string Image { get; set; } = string.Empty;
 
         public Guid CategoryId { get; set; }
+    }
+
+    public class ProductFilterRequest
+    {
+        public Guid UserId { get; set; }
+        
+        public string? SearchKey { get; set; }
+
+        public string? CategoryName { get; set; }
+
+        public bool? IsActive { get; set; }
+
+        public int PageSize { get; set; }
+
+        public int PageNumber { get; set; }
     }
 }

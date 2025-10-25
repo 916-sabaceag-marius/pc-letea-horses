@@ -22,7 +22,7 @@
     <ProjectReference Include="..\Honse.Engines.Interfaces\Honse.Engines.Common.csproj" />
     <ProjectReference Include="..\Honse.Engines.Validation\Honse.Engines.Validation.csproj" />
     <ProjectReference Include="..\Honse.Global\Honse.Global.csproj" />
-    <ProjectReference Include="..\Honse.Resources\Honse.Resources.csproj" />
+    <ProjectReference Include="..\Honse.Resources.Interfaces\Honse.Resources.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

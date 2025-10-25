@@ -1,12 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Honse.Resources.Interface
+namespace Honse.Resources.Interfaces.Entities
 {
-    public interface IProductResource : IFilterResource<Product>
-    {
-
-    }
-
     public class Product : Entity
     {
         public string Name { get; set; } = string.Empty;
@@ -19,8 +16,10 @@ namespace Honse.Resources.Interface
 
         public string Image { get; set; } = string.Empty;
 
-        //[ForeignKey("Category")]
-        [NotMapped]
+        public ProductCategory Category { get; set; }
+
+        [ForeignKey("ProductCategory")]
+        //[NotMapped]
         public Guid CategoryId { get; set; }
 
         public bool IsEnabled { get; set; } = true;

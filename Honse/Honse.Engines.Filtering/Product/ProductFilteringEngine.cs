@@ -6,9 +6,9 @@ namespace Honse.Engines.Filtering.Product
 {
     public class ProductFilteringEngine : IProductFilteringEngine
     {
-        public Specification<Common.Product> ToSpecification(ProductFilterRequest filter)
+        public Specification<Resources.Interfaces.Entities.Product> GetSpecification(ProductFilterRequest filter)
         {
-            Specification<Common.Product> specification = new SpecificationProductHasUser(filter.UserId);
+            Specification<Resources.Interfaces.Entities.Product> specification = new SpecificationProductHasUser(filter.UserId);
 
             if (filter.SearchKey != null)
                 specification.And(new SpecificationProductSearchKey(filter.SearchKey));

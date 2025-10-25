@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Honse.Global\Honse.Global.csproj" />
+    <ProjectReference Include="..\Honse.Resources.Interfaces\Honse.Resources.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

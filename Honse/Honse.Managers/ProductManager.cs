@@ -1,50 +1,85 @@
 ﻿
-using Honse.Engines.Filtering.Product;
-using Honse.Managers.Interface;
-using Honse.Resources.Interface;
+using Honse.Global;
+using Honse.Global.Extensions;
+using Honse.Managers.Interfaces;
 
 namespace Honse.Managers
 {
-    public class ProductManager : Interface.IProductManager
+    public class ProductManager : Interfaces.IProductManager
     {
-        private readonly IProductResource productResource;
-        private readonly ProductFilteringEngine productFilteringEngine;
+        private readonly Resources.Interfaces.IProductResource productResource;
+        private readonly Resources.Interfaces.IProductCategoryResource productCategoryResource;
+        private readonly Engines.Filtering.Interfaces.IProductFilteringEngine productFilteringEngine;
+        private readonly Engines.Validation.Interfaces.IProductValidationEngine productValidationEngine;
 
         public ProductManager(
-            Resources.Interface.IProductResource productResource,
-            Engines.Filtering.Product.ProductFilteringEngine productFilteringEngine)
+            Resources.Interfaces.IProductResource productResource,
+            Resources.Interfaces.IProductCategoryResource productCategoryResource,
+            Engines.Filtering.Interfaces.IProductFilteringEngine productFilteringEngine,
+            Engines.Validation.Interfaces.IProductValidationEngine productValidationEngine)
         {
             this.productResource = productResource;
+            this.productCategoryResource = productCategoryResource;
             this.productFilteringEngine = productFilteringEngine;
+            this.productValidationEngine = productValidationEngine;
         }
 
-        public Task<Interface.Product> AddProduct(CreateProductRequest request)
+        public async Task<Interfaces.Product> AddProduct(CreateProductRequest request)
         {
-            throw new NotImplementedException();
+            productValidationEngine.ValidateCreateProduct(request.DeepCopyTo<Engines.Common.CreateProduct>());
+
+            var productCategory = await productCategoryResource.GetById(request.CategoryId, request.UserId);
+
+            if (productCategory == null)
+                throw new Exception("Product category not found!");
+
+            var product = request.DeepCopyTo<Resources.Interfaces.Entities.Product>();
+
+            product.Id = Guid.NewGuid();
+            //product.Category = productCategory;
+
+            product = await productResource.Add(product);
+
+            return product.DeepCopyTo<Interfaces.Product>();
         }
 
-        public Task<Interface.Product> DeleteProduct(Guid id, Guid userId)
+        public async Task DeleteProduct(Guid id, Guid userId)
         {
-            throw new NotImplementedException();
+            bool result = await productResource.Delete(id, userId);
+
+            if (!result)
+                throw new Exception("Couldn't delete product!");
         }
 
-        public async Task<List<Interface.Product>> GetAllProducts(Guid userId)
+        public async Task<List<Interfaces.Product>> GetAllProducts(Guid userId)
         {
-            var specification = productFilteringEngine.ToSpecification(new Engines.Filtering.Interfaces.ProductFilterRequest
-            {
-                UserId = userId
-            });
+            var products = await productResource.GetAll(userId);
 
-            return await productResource.Filter(specification, 100, 1);
+            return products.DeepCopyTo<List<Interfaces.Product>>();
         }
 
-        public Task<Interface.Product> GetProductById(Guid id, Guid userId)
+        public async Task<Interfaces.Product> GetProductById(Guid id, Guid userId)
         {
-            throw new NotImplementedException();
+            var product = await productResource.GetById(id, userId);
+
+            if (product == null)
+                throw new Exception("Product not found!");
+
+            return product.DeepCopyTo<Product>();
         }
 
-        public Task<Interface.Product> UpdateProduct(UpdateProductRequest request)
+        public async Task<PaginatedResult<Product>> FilterProducts(ProductFilterRequest request)
         {
+            var specification = productFilteringEngine.GetSpecification(request.DeepCopyTo<Engines.Filtering.Interfaces.ProductFilterRequest>());
+
+            var products = await productResource.Filter(specification, request.PageSize, request.PageNumber);
+
+            return products.DeepCopyTo<PaginatedResult<Product>>();
+        }
+
+        public Task<Interfaces.Product> UpdateProduct(UpdateProductRequest request)
+        {
+            // Similar to add
             throw new NotImplementedException();
         }
     }
