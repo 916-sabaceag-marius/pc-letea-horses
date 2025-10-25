@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Honse.Resources.Interfaces.Entities;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Honse.Resources.Interfaces
 {
@@ -7,6 +9,7 @@ namespace Honse.Resources.Interfaces
         private readonly AppDbContext dbContext;
 
         protected DbSet<T> dbSet;
+        protected List<Expression<Func<T, object>>> includeProperties = new List<Expression<Func<T, object>>>();
 
         public Resource(AppDbContext dbContext)
         {
@@ -39,12 +42,18 @@ namespace Honse.Resources.Interfaces
 
         public async Task<IEnumerable<T>> GetAll(Guid userId)
         {
-            return await dbSet.Where(t => t.UserId == userId).ToListAsync();
+            var query = dbSet.AsQueryable();
+            query = ApplyIncludes(query);
+
+            return await query.Where(t => t.UserId == userId).ToListAsync();
         }
 
         public async Task<T?> GetById(Guid id, Guid userId)
         {
-            return await dbSet.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+            var query = dbSet.AsQueryable();
+            query = ApplyIncludes(query);
+
+            return await query.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
         }
 
         public async Task<T?> Update(Guid id, Guid userId, T t)
@@ -57,8 +66,20 @@ namespace Honse.Resources.Interfaces
             dbSet.Update(t);
 
             await dbContext.SaveChangesAsync();
-
             return t;
+        }
+
+        protected IQueryable<T> ApplyIncludes(IQueryable<T> query)
+        {
+            if (includeProperties.Any())
+            {
+                foreach (var includeProperty in includeProperties)
+                {
+                    query = query.Include(includeProperty);
+                }
+            }
+
+            return query;
         }
     }
 }

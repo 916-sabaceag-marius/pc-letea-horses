@@ -49,7 +49,7 @@ namespace Honse.API.Controllers
 
             var productResponse = await productManager.GetProductById(id, user.Id).WithTryCatch();
 
-            if (!userResponse.IsSuccessfull)
+            if (!productResponse.IsSuccessfull)
             {
                 return BadRequest(productResponse.Exception.Message);
             }
@@ -86,7 +86,7 @@ namespace Honse.API.Controllers
 
             var productResponse = await productManager.FilterProducts(request).WithTryCatch();
 
-            if (!userResponse.IsSuccessfull)
+            if (!productResponse.IsSuccessfull)
             {
                 return BadRequest(productResponse.Exception.Message);
             }
@@ -122,7 +122,7 @@ namespace Honse.API.Controllers
 
             var productResponse = await productManager.GetAllProducts(user.Id).WithTryCatch();
 
-            if (!userResponse.IsSuccessfull)
+            if (!productResponse.IsSuccessfull)
             {
                 return BadRequest(productResponse.Exception.Message);
             }
@@ -169,6 +169,7 @@ namespace Honse.API.Controllers
 
         [Authorize]
         [HttpDelete]
+        [Route("{id}")]
         public async Task<IActionResult> DeleteProduct([FromRoute] Guid id)
         {
             if (!ModelState.IsValid)
@@ -194,7 +195,7 @@ namespace Honse.API.Controllers
 
             var productResponse = await productManager.DeleteProduct(id, user.Id).WithTryCatch();
 
-            if (!userResponse.IsSuccessfull)
+            if (!productResponse.IsSuccessfull)
             {
                 return BadRequest(productResponse.Exception.Message);
             }

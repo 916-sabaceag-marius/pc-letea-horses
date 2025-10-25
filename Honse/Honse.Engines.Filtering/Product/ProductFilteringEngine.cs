@@ -11,7 +11,7 @@ namespace Honse.Engines.Filtering.Product
             Specification<Resources.Interfaces.Entities.Product> specification = new SpecificationProductHasUser(filter.UserId);
 
             if (filter.SearchKey != null)
-                specification.And(new SpecificationProductSearchKey(filter.SearchKey));
+                specification = specification.And(new SpecificationProductSearchKey(filter.SearchKey));
 
             //TODO: Add more filters
 

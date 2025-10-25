@@ -1,4 +1,5 @@
-﻿using Honse.Global.Specification;
+﻿using Honse.Global;
+using Honse.Global.Specification;
 using Microsoft.EntityFrameworkCore;
 
 namespace Honse.Resources.Interfaces
@@ -12,7 +13,10 @@ namespace Honse.Resources.Interfaces
 
         public async Task<Global.PaginatedResult<T>> Filter(Specification<T> specification, int pageSize, int pageNumber)
         {
-            List<T> entities = await dbSet
+            var query = dbSet.AsQueryable();
+            query = ApplyIncludes(query);
+
+            List<T> entities = await query
             .Where(specification.Expression)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)

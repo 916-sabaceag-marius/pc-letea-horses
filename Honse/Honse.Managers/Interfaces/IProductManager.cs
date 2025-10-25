@@ -32,7 +32,7 @@ namespace Honse.Managers.Interfaces
 
         public string Image { get; set; } = string.Empty;
 
-        public string Category { get; set; } = string.Empty;
+        public ProductCategory Category { get; set; }
     }
 
     public class CreateProductRequest
@@ -82,5 +82,12 @@ namespace Honse.Managers.Interfaces
         public int PageSize { get; set; }
 
         public int PageNumber { get; set; }
+    }
+
+    public class ProductCategory
+    {
+        public Guid Id { get; set; }
+
+        public string Name { get; set; } = string.Empty;
     }
 }
