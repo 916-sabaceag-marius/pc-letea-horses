@@ -29,7 +29,7 @@ namespace Honse.Engines.Product
                 this.userId = userId;
             }
 
-            public override Expression<Func<Product, bool>> Expr =>
+            public override Expression<Func<Product, bool>> Expression =>
                 (Product product) => product.UserId == userId;
         }
 
@@ -41,7 +41,7 @@ namespace Honse.Engines.Product
             {
                 this.searchKey = searchKey;
             }
-            public override Expression<Func<Product, bool>> Expr =>
+            public override Expression<Func<Product, bool>> Expression =>
                 (Product product) => product.Name.Contains(searchKey) || product.Description.Contains(searchKey);
         }
     }

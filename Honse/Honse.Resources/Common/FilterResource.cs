@@ -14,12 +14,12 @@ namespace Honse.Resources.Common
         public async Task<PaginatedResult<T>> Filter(Specification<T> specification, int pageSize, int pageNumber)
         {
             List<T> entities = await dbSet
-            .Where(specification.Expr)
+            .Where(specification.Expression)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
-            int count = await dbSet.Where(specification.Expr).CountAsync();
+            int count = await dbSet.Where(specification.Expression).CountAsync();
 
             return new PaginatedResult<T>
             {

@@ -1,6 +1,4 @@
-﻿
-using Honse.Engines.Interface;
-using Honse.Global;
+﻿using Honse.Global;
 using Honse.Global.Extensions;
 using Honse.Managers.Interface;
 using Microsoft.AspNetCore.Identity;
@@ -18,12 +16,12 @@ namespace Honse.Managers
         private readonly UserManager<User> userManager;
         private readonly IConfiguration configuration;
         private readonly SignInManager<User> signInManager;
-        private readonly IUserValidationEngine userValidationEngine;
+        private readonly Engines.Validation.Interface.IUserValidationEngine userValidationEngine;
 
         public UserManager(UserManager<User> userManager,
         IConfiguration configuration,
         SignInManager<User> signInManager,
-        Engines.Interface.IUserValidationEngine userValidationEngine)
+        Engines.Validation.Interface.IUserValidationEngine userValidationEngine)
         {
             this.userManager = userManager;
             this.configuration = configuration;
@@ -43,7 +41,7 @@ namespace Honse.Managers
 
         public async Task<UserAuthenticationResponse> Login(UserLoginRequest request)
         {
-            userValidationEngine.ValidateLogin(request.DeepCopyTo<Engines.User.UserLogin>());
+            userValidationEngine.ValidateLogin(request.DeepCopyTo<Engines.Common.UserLogin>());
 
             User? user = await userManager.Users.FirstOrDefaultAsync(x => x.UserName == request.UserName || x.Email == request.UserName);
 
@@ -69,7 +67,7 @@ namespace Honse.Managers
 
         public async Task<UserAuthenticationResponse> Register(UserRegisterRequest request)
         {
-            userValidationEngine.ValidateRegister(request.DeepCopyTo<Engines.User.UserRegister>());
+            userValidationEngine.ValidateRegister(request.DeepCopyTo<Engines.Common.UserRegister>());
 
             User user = request.DeepCopyTo<User>();
 

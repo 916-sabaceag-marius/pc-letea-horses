@@ -2,17 +2,17 @@
 
 namespace Honse.Global.Specification;
 
-public static class SpecificationExtension
+public static class SpecificationExtensions
 {
     public static Specification<TEntity> And<TEntity>(this Specification<TEntity> one, Specification<TEntity> other)    
     {
-        var expression = CombineTwoExpressions(one.Expr, other.Expr, Expression.AndAlso);
+        var expression = CombineTwoExpressions(one.Expression, other.Expression, Expression.AndAlso);
         return new EmptySpecification<TEntity>(expression);
     }
 
     public static Specification<TEntity> Or<TEntity>(this Specification<TEntity> one, Specification<TEntity> other)    
     {
-        var expression = CombineTwoExpressions(one.Expr, other.Expr, Expression.OrElse);
+        var expression = CombineTwoExpressions(one.Expression, other.Expression, Expression.OrElse);
 
         return new EmptySpecification<TEntity>(expression);
     }
@@ -20,8 +20,8 @@ public static class SpecificationExtension
     //TODO fix it
     public static Specification<TEntity> Not<TEntity>(this Specification<TEntity> one) 
     {
-        var param = one.Expr.Parameters;
-        var body = Expression.Not(one.Expr.Body);
+        var param = one.Expression.Parameters;
+        var body = Expression.Not(one.Expression.Body);
 
         return new EmptySpecification<TEntity>(Expression.Lambda<Func<TEntity, bool>>(body, param));
     }

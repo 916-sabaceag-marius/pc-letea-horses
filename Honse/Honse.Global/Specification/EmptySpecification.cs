@@ -6,8 +6,8 @@ public sealed class EmptySpecification<TEntity> : Specification<TEntity>
 {
     public EmptySpecification(Expression<Func<TEntity,bool>> expr)
     {
-        Expr = expr;
+        Expression = expr;
     }
 
-    public override Expression<Func<TEntity, bool>> Expr { get; }
+    public override Expression<Func<TEntity, bool>> Expression { get; }
 }
