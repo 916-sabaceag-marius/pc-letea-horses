@@ -1,0 +1,27 @@
+header{
+    display: flex;
+    flex-direction: column;
+
+    
+
+}
+
+.main--header{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.logo{
+    font-size: 2.25rem;
+    font-weight: bold;
+}
+
+.navbar{
+    display: flex;
+}
+
+.navbar *{
+    font-size: 1.25rem;
+    padding: 1.5rem 2.5rem;
+}
