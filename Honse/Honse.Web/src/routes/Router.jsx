@@ -2,6 +2,12 @@ import {createBrowserRouter} from 'react-router';
 import App from '../App';
 import RestaurantsListPage from '../pages/public/RestaurantListPage/RestaurantsListPage';
 
+import AuthenticatedRoute from '../routes/AuthenticatedRoute';
+import UnauthenticatedRoute from '../routes/UnauthenticatedRoute';
+
+import LoginPage from '../pages/public/Auth/LoginPage';
+import RegisterPage from '../pages/public/Auth/RegisterPage';
+
 export const router = createBrowserRouter([
     {
         path: "/",
@@ -18,7 +24,7 @@ export const router = createBrowserRouter([
 
             // Landing page: /public
 
-            {path: "/public", element: <RestaurantsListPage />}
+            {path: "/public", element: <RestaurantsListPage />},
 
             // Restaurants list page : /public/restaurants
 
@@ -26,9 +32,20 @@ export const router = createBrowserRouter([
             
             // UNAUTHENTICATED PAGES - you can access them only if you aren't logged in
 
-            // Login page: /public/login
-
-            // Register page: /public/register
+            { path: "/public/login",
+                element: (
+                    <UnauthenticatedRoute redirectPage='/public'>
+                        <LoginPage />
+                    </UnauthenticatedRoute>
+                )
+            },
+            { path: "/public/register",
+                element: (
+                    <UnauthenticatedRoute redirectPage='/public'>
+                        <RegisterPage />
+                    </UnauthenticatedRoute>
+                )
+            }
 
             // PRIVATE PAGES - you can access them only if you are logged in
 
