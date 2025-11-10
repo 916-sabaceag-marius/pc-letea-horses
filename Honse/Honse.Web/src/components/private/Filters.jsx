@@ -8,6 +8,7 @@ export default function Filters({
   isActive,
   setIsActive,
   categories,
+  searchPlaceholder = "Search products",
 }) {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showAvailabilityDropdown, setShowAvailabilityDropdown] = useState(false);
@@ -24,7 +25,7 @@ export default function Filters({
             </div>
              <input
               className="form-input flex flex-1 rounded-r-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark px-4 text-base focus:outline-0 focus:ring-2 focus:ring-secondary"
-              placeholder="Search products"
+              placeholder={searchPlaceholder}
               value={searchKey}
               onChange={(e) => setSearchKey(e.target.value)}
             />
