@@ -4,22 +4,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Honse.Resources
 {
-    public class OrderResource : IOrderResource
+    public class OrderResource : FilterResource<Order>, IOrderResource
     {
-        private readonly AppDbContext dbContext;
-        private readonly DbSet<Order> dbSet;
-
-        public OrderResource(AppDbContext dbContext)
+        public OrderResource(AppDbContext dbContext) : base(dbContext)
         {
-            this.dbContext = dbContext;
-            this.dbSet = dbContext.Orders;
+            dbSet = dbContext.Order;
         }
 
-        public async Task<Order> Add(Order order)
+        public Task<Order?> GetByIdPublic(Guid id)
         {
-            await dbSet.AddAsync(order);
-            await dbContext.SaveChangesAsync();
-            return order;
+            return dbSet.FirstOrDefaultAsync(o => o.Id == id);
+        }
+
+        public async Task<IEnumerable<Order>> GetByRestaurantId(Guid restaurantId)
+        {
+            return await dbSet
+                .Where(o => o.RestaurantId == restaurantId)
+                .ToListAsync();
         }
     }
 }

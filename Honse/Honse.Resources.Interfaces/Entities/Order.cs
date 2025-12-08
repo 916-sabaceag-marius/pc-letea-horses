@@ -1,34 +1,39 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using Honse.Global.Order;
 
 namespace Honse.Resources.Interfaces.Entities
 {
-    public class Order
+    public class Order : Entity
     {
-        public Guid Id { get; set; }
-
-        [ForeignKey("Restaurant")]
         public Guid RestaurantId { get; set; }
 
-        public string CustomerEmail { get; set; } = string.Empty;
+        public string OrderNo { get; set; } = string.Empty;
 
-        public string CustomerName { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
-        public string CustomerPhone { get; set; } = string.Empty;
+        public decimal Total { get; set; }
 
-        public string DeliveryAddress { get; set; } = string.Empty; // JSON format
+        // Current status as enum
+        public OrderStatus OrderStatus { get; set; } = OrderStatus.New;
 
-        public Global.Order.OrderStatus OrderStatus { get; set; } = Global.Order.OrderStatus.Unconfirmed;
+        // Stores the JSON history of status changes
+        public string StatusHistory { get; set; } = string.Empty;
 
-        public decimal TotalAmount { get; set; }
+        // Flattened Client Info
+        public string ClientName { get; set; } = string.Empty;
+        
+        public string ClientEmail { get; set; } = string.Empty;
 
-        public Guid ConfirmationToken { get; set; }
+        // Stores the JSON Address structure
+        public string DeliveryAddress { get; set; } = string.Empty;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        // Stores the JSON array of products
+        public string Products { get; set; } = string.Empty;
 
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        // Nullable timings
+        public DateTime? PreparationTime { get; set; }
+        
+        public DateTime? DeliveryTime { get; set; }
 
-        // Navigation properties
-        public Restaurant? Restaurant { get; set; }
-        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        // UserId is inherited from Entity
     }
 }
