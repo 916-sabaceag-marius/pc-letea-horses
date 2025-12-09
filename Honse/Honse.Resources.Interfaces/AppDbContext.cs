@@ -12,10 +12,6 @@ namespace Honse.Resources.Interfaces
         public DbSet<Entities.ProductCategory> ProductCategory { get; set; }
 
         public DbSet<Entities.Restaurant> Restaurant { get; set; }
-
-        // public DbSet<Entities.Order> Orders { get; set; }
-
-        public DbSet<Entities.OrderItem> OrderItems { get; set; }
         
         public DbSet<Entities.Order> Order { get; set; }
 
@@ -33,12 +29,9 @@ namespace Honse.Resources.Interfaces
                     owned.ToJson();
                 });
 
-            // Configure Order-OrderItem relationship
             modelBuilder.Entity<Order>()
-                .HasMany(o => o.OrderItems)
-                .WithOne(oi => oi.Order)
-                .HasForeignKey(oi => oi.OrderId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .Property(o => o.OrderStatus)
+                .HasConversion<string>();
         }
     }
 }

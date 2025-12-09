@@ -41,16 +41,16 @@ namespace Honse.Engines.Validation
                     errorMessage += "City is required!\n";
             }
 
-            if (order.Items == null || order.Items.Count == 0)
-                errorMessage += "At least one item is required!\n";
+            if (order.Products == null || order.Products.Count == 0)
+                errorMessage += "At least one product is required!\n";
             else
             {
-                foreach (var item in order.Items)
+                foreach (var product in order.Products)
                 {
-                    if (item.ProductId == Guid.Empty)
-                        errorMessage += "Product ID is required for all items!\n";
+                    if (product.ProductId == Guid.Empty)
+                        errorMessage += "Product ID is required for all products!\n";
 
-                    if (item.Quantity <= 0)
+                    if (product.Quantity <= 0)
                         errorMessage += "Quantity must be greater than 0!\n";
                 }
             }

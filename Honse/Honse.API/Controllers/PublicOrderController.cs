@@ -1,6 +1,8 @@
 using Honse.Global.Extensions;
 using Honse.Managers.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Honse.API.Controllers
 {
@@ -16,7 +18,7 @@ namespace Honse.API.Controllers
         }
 
         /// <summary>
-        /// Places a new order for a customer
+        /// Places a new order for authenticated or guest customers
         /// </summary>
         [HttpPost]
         [Route("place")]
@@ -24,7 +26,14 @@ namespace Honse.API.Controllers
         {
             try
             {
-                var response = await orderManager.PlaceOrder(request);
+                Guid? userId = null;
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid parsedUserId))
+                {
+                    userId = parsedUserId;
+                }
+
+                var response = await orderManager.PlaceOrder(request, userId);
                 return Ok(response);
             }
             catch (System.ComponentModel.DataAnnotations.ValidationException ex)

@@ -1,19 +1,16 @@
 USE [Honse];
 
--- 1. Create the Order Table with JSON Address
 CREATE TABLE [Order](
     [Id] UNIQUEIDENTIFIER PRIMARY KEY NONCLUSTERED DEFAULT NEWID(),
     
-    -- Link to User Account
-    [UserId] UNIQUEIDENTIFIER NOT NULL REFERENCES [AspNetUsers]([Id]),
+    -- Link to User Account (nullable for guest orders)
+    [UserId] UNIQUEIDENTIFIER NULL,
     
     -- CLIENT SNAPSHOT
-    -- We keep Name/Email separate for easier searching, but Address is now a flexible JSON
     [ClientName] NVARCHAR(255) NOT NULL,
     [ClientEmail] NVARCHAR(255) NOT NULL,
     
     -- JSON ADDRESS
-    -- Example format: { "Street": "123 Main St", "City": "New York", "Zip": "10001", "Floor": 2 }
     [DeliveryAddress] NVARCHAR(MAX) NOT NULL, 
 
     -- ORDER DETAILS
@@ -22,18 +19,28 @@ CREATE TABLE [Order](
     [Timestamp] DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     [Total] DECIMAL(19, 4) NOT NULL,
     
-    -- JSON STATUS HISTORY
-    [OrderStatus] VARCHAR(MAX) NOT NULL, 
+    -- CURRENT ORDER STATUS (enum as string, NOT JSON)
+    [OrderStatus] VARCHAR(50) NOT NULL,
+    
+    -- JSON STATUS HISTORY (array of status changes)
+    [StatusHistory] NVARCHAR(MAX) NOT NULL,
+    
+    -- JSON PRODUCTS (array of order items)
+    [Products] NVARCHAR(MAX) NOT NULL,
     
     -- Timings
     [PreparationTime] DATETIME2 NULL,
     [DeliveryTime] DATETIME2 NULL,
 
-    -- VALIDATION: Ensure the text fields actually contain valid JSON
-    CONSTRAINT [CK_Order_OrderStatus_JSON] CHECK (ISJSON([OrderStatus]) = 1),
-    CONSTRAINT [CK_Order_Address_JSON] CHECK (ISJSON([DeliveryAddress]) = 1)
+    -- VALIDATION: Ensure JSON fields contain valid JSON
+    CONSTRAINT [CK_Order_StatusHistory_JSON] CHECK (ISJSON([StatusHistory]) = 1),
+    CONSTRAINT [CK_Order_Products_JSON] CHECK (ISJSON([Products]) = 1),
+    CONSTRAINT [CK_Order_Address_JSON] CHECK (ISJSON([DeliveryAddress]) = 1),
+    
+    -- Foreign key constraint (supports NULL for guest orders)
+    CONSTRAINT [FK_Order_User] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers]([Id]) ON DELETE NO ACTION
 )
 
--- 3. Indexes
+-- Indexes
 CREATE INDEX [IX_Order_UserId] ON [Order]([UserId])
 CREATE INDEX [IX_Order_RestaurantId] ON [Order]([RestaurantId])

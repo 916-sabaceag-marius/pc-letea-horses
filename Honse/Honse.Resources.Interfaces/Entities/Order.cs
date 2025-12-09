@@ -5,6 +5,7 @@ namespace Honse.Resources.Interfaces.Entities
     public class Order : Entity
     {
         public Guid RestaurantId { get; set; }
+        public new Guid? UserId { get; set; }
 
         public string OrderNo { get; set; } = string.Empty;
 

@@ -7,7 +7,7 @@ namespace Honse.Managers.Interfaces
 {
     public interface IOrderManager
     {
-        Task<PlaceOrderResponse> PlaceOrder(PlaceOrderRequest request);
+        Task<PlaceOrderResponse> PlaceOrder(PlaceOrderRequest request, Guid? userId);
         Task<EntityOrder> AddOrder(CreateOrderRequest request);
         Task<EntityOrder?> GetOrderById(Guid id, Guid userId);
         Task<EntityOrder?> GetOrderByIdPublic(Guid id);
@@ -82,7 +82,7 @@ namespace Honse.Managers.Interfaces
 
         public Address DeliveryAddress { get; set; } = new Address();
 
-        public List<OrderItemRequest> Items { get; set; } = new List<OrderItemRequest>();
+        public List<OrderItemRequest> Products { get; set; } = new List<OrderItemRequest>();
     }
 
     public class OrderItemRequest
