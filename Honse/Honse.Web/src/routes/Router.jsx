@@ -13,6 +13,7 @@ import AllProductsPage from '../pages/private/products/AllProductsPage';
 import AddProductPage from '../pages/private/products/AddProductPage';
 import AllRestaurantsPage from '../pages/private/restaurants/AllRestaurantsPage';
 import AddRestaurantPage from '../pages/private/restaurants/AddRestaurantPage';
+import OrderTrackingPage from '../pages/public/OrderTrackingPage/OrderTrackingPage';
 export const router = createBrowserRouter([
     {
         path: "/",
@@ -52,6 +53,12 @@ export const router = createBrowserRouter([
                     <UnauthenticatedRoute redirectPage='/public'>
                         <RegisterPage />
                     </UnauthenticatedRoute>
+                )
+            },
+
+             { path: "/public/order-tracking",
+                element: (
+                        < OrderTrackingPage/>
                 )
             },
 
