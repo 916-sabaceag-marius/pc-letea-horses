@@ -231,7 +231,7 @@ namespace Honse.Managers
                 ClientName = request.CustomerName,
                 ClientEmail = request.CustomerEmail,
                 DeliveryAddress = System.Text.Json.JsonSerializer.Serialize(request.DeliveryAddress),
-                Status = Global.Order.OrderStatus.New,
+                OrderStatus = Global.Order.OrderStatus.New,
                 Products = System.Text.Json.JsonSerializer.Serialize(orderProducts),
                 Total = totalAmount
             };
