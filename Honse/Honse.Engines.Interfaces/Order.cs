@@ -15,10 +15,10 @@ namespace Honse.Engines.Common
 
         public Global.Address DeliveryAddress { get; set; } = new Global.Address();
 
-        public List<OrderProductData> Products { get; set; } = new List<OrderProductData>();
+        public List<OrderProduct> Products { get; set; } = new List<OrderProduct>();
     }
 
-    public class OrderProductData
+    public class OrderProduct
     {
         public Guid ProductId { get; set; }
 

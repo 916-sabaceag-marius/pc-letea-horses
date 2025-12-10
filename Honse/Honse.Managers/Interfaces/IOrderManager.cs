@@ -1,41 +1,21 @@
-﻿using Honse.Global;
+using Honse.Global;
 using Honse.Resources.Interfaces.Entities;
 using Honse.Global.Order;
-using EntityOrder = Honse.Resources.Interfaces.Entities.Order;
+using Order = Honse.Resources.Interfaces.Entities.Order;
 
 namespace Honse.Managers.Interfaces
 {
     public interface IOrderManager
     {
         Task<PlaceOrderResponse> PlaceOrder(PlaceOrderRequest request, Guid? userId);
-        Task<EntityOrder> AddOrder(CreateOrderRequest request);
-        Task<EntityOrder?> GetOrderById(Guid id, Guid userId);
-        Task<EntityOrder?> GetOrderByIdPublic(Guid id);
-        Task<EntityOrder> UpdateOrder(UpdateOrderRequest request);
-        Task<EntityOrder> ProcessOrder(OrderProcessRequest request);
+        Task<Order?> GetOrderById(Guid id, Guid userId);
+        Task<Order?> GetOrderByIdPublic(Guid id);
+        Task<Order> UpdateOrder(UpdateOrderRequest request);
+        Task<Order> ProcessOrder(OrderProcessRequest request);
         Task DeleteOrder(Guid id, Guid userId);
         Task CancelOrderPublic(Guid id);
-        Task<List<EntityOrder>> GetAllOrdersByRestaurant(Guid restaurantId, Guid userId);
-        Task<Global.PaginatedResult<EntityOrder>> FilterOrders(OrderFilterRequest request);
-    }
-
-    public class CreateOrderRequest
-    {
-        public Guid RestaurantId { get; set; }
-        public string ClientName { get; set; } = string.Empty;
-        public string ClientEmail { get; set; } = string.Empty;
-        public string DeliveryAddress { get; set; } = string.Empty;
-        public List<OrderProductRequest> Products { get; set; } = new();
-
-        public Guid UserId { get; set; }
-    }
-
-    public class OrderProductRequest
-    {
-        public string Name { get; set; } = string.Empty;
-        public decimal Quantity { get; set; }
-        public decimal Price { get; set; }
-        public decimal VAT { get; set; }
+        Task<List<Order>> GetAllOrdersByRestaurant(Guid restaurantId, Guid userId);
+        Task<Global.PaginatedResult<Order>> FilterOrders(OrderFilterRequest request);
     }
 
     public class UpdateOrderRequest
@@ -82,10 +62,10 @@ namespace Honse.Managers.Interfaces
 
         public Address DeliveryAddress { get; set; } = new Address();
 
-        public List<OrderItemRequest> Products { get; set; } = new List<OrderItemRequest>();
+        public List<OrderProductRequest> Products { get; set; } = new List<OrderProductRequest>();
     }
 
-    public class OrderItemRequest
+    public class OrderProductRequest
     {
         public Guid ProductId { get; set; }
 
