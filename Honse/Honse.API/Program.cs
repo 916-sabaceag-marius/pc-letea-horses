@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -114,6 +115,7 @@ builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IUserValidationEn
 builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IRestaurantValidationEngine, Honse.Engines.Validation.RestaurantValidationEngine>();
 builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IProductCategoryValidationEngine, Honse.Engines.Validation.ProductCategoryValidationEngine>();
 builder.Services.AddScoped<Honse.Engines.Filtering.Interfaces.IRestaurantFilteringEngine, Honse.Engines.Filtering.Restaurant.RestaurantFilteringEngine>();
+builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IOrderValidationEngine, Honse.Engines.Validation.OrderValidationEngine>();
 builder.Services.AddScoped<Honse.Engines.Filtering.Interfaces.IOrderFilteringEngine, Honse.Engines.Filtering.Order.OrderFilteringEngine>();
 
 
@@ -124,6 +126,11 @@ builder.Services.AddScoped<Honse.Managers.Interfaces.IProductManager, Honse.Mana
 builder.Services.AddScoped<Honse.Managers.Interfaces.IProductCategoryManager, Honse.Managers.ProductCategoryManager>();
 builder.Services.AddScoped<Honse.Managers.Interfaces.IRestaurantManager, Honse.Managers.RestaurantManager>();
 builder.Services.AddScoped<Honse.Managers.Interfaces.IOrderManager, Honse.Managers.OrderManager>();
+
+// Services
+
+builder.Services.AddTransient<IEmailSender, Honse.Services.Email.EmailSenderService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

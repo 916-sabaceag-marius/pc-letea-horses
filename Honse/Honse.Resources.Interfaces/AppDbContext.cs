@@ -12,7 +12,7 @@ namespace Honse.Resources.Interfaces
         public DbSet<Entities.ProductCategory> ProductCategory { get; set; }
 
         public DbSet<Entities.Restaurant> Restaurant { get; set; }
-
+        
         public DbSet<Entities.Order> Order { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> context) : base(context)
@@ -28,6 +28,10 @@ namespace Honse.Resources.Interfaces
                 {
                     owned.ToJson();
                 });
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.OrderStatus)
+                .HasConversion<string>();
         }
     }
 }
