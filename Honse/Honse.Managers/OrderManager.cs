@@ -196,7 +196,7 @@ namespace Honse.Managers
 
             foreach (var item in request.Products)
             {
-                var product = await _productResource.GetProductByIdPublic(item.ProductId);
+                var product = await _productResource.GetByIdNoTracking(item.ProductId, restaurant.UserId);
                 if (product == null)
                     throw new ValidationException($"Product with ID {item.ProductId} not found!");
 
