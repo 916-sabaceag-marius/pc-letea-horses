@@ -118,8 +118,6 @@ builder.Services.AddScoped<Honse.Engines.Filtering.Interfaces.IRestaurantFilteri
 builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IOrderValidationEngine, Honse.Engines.Validation.OrderValidationEngine>();
 builder.Services.AddScoped<Honse.Engines.Filtering.Interfaces.IOrderFilteringEngine, Honse.Engines.Filtering.Order.OrderFilteringEngine>();
 
-
-// Managers
 // Managers
 builder.Services.AddScoped<Honse.Managers.Interfaces.IUserManager, Honse.Managers.UserManager>();
 builder.Services.AddScoped<Honse.Managers.Interfaces.IProductManager, Honse.Managers.ProductManager>();
@@ -130,6 +128,7 @@ builder.Services.AddScoped<Honse.Managers.Interfaces.IOrderManager, Honse.Manage
 // Services
 
 builder.Services.AddTransient<IEmailSender, Honse.Services.Email.EmailSenderService>();
+
 
 var app = builder.Build();
 

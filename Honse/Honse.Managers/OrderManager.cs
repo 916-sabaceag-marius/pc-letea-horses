@@ -53,7 +53,7 @@ namespace Honse.Managers
                     Notes = request.StatusNotes
                 });
 
-                order.OrderStatus = request.NewStatus.Value;
+                order.Status = request.NewStatus.Value;
                 order.StatusHistory = System.Text.Json.JsonSerializer.Serialize(history);
             }
 
@@ -80,7 +80,7 @@ namespace Honse.Managers
                 Notes = "Order cancelled by user"
             });
 
-            order.OrderStatus = Global.Order.OrderStatus.Cancelled;
+            order.Status = Global.Order.OrderStatus.Cancelled;
             order.StatusHistory = System.Text.Json.JsonSerializer.Serialize(history);
 
             await _orderResource.Update(order.Id, userId, order);
@@ -111,7 +111,7 @@ namespace Honse.Managers
                 Notes = request.StatusNotes
             });
 
-            order.OrderStatus = request.NewStatus;
+            order.Status = request.NewStatus;
             order.StatusHistory = System.Text.Json.JsonSerializer.Serialize(history);
 
             // Update preparation time when status becomes Accepted
@@ -135,10 +135,10 @@ namespace Honse.Managers
                 ?? throw new InvalidOperationException("Order not found");
 
             // Check if order can be cancelled (only if not finished or already cancelled)
-            if (order.OrderStatus == Global.Order.OrderStatus.Finished ||
-                order.OrderStatus == Global.Order.OrderStatus.Cancelled)
+            if (order.Status == Global.Order.OrderStatus.Finished ||
+                order.Status == Global.Order.OrderStatus.Cancelled)
             {
-                throw new InvalidOperationException($"Cannot cancel order with status: {order.OrderStatus}");
+                throw new InvalidOperationException($"Cannot cancel order with status: {order.Status}");
             }
 
             // Mark as cancelled
@@ -152,7 +152,7 @@ namespace Honse.Managers
                 Notes = "Order cancelled by customer"
             });
 
-            order.OrderStatus = Global.Order.OrderStatus.Cancelled;
+            order.Status = Global.Order.OrderStatus.Cancelled;
             order.StatusHistory = System.Text.Json.JsonSerializer.Serialize(history);
 
             await _orderResource.Update(order.Id, order.UserId ?? Guid.Empty, order);
