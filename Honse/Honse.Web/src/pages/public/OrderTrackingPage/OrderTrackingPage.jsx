@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getOrderDetailsAPI, cancelOrderAPI } from "../../../services/orderService";
+import { getOrderDetailsAPI, cancelOrderAPI, STATUS_INFO } from "../../../services/publicOrderService";
 import { useNavigate, useParams } from "react-router";
 
 export default function OrderTrackingPage() {
@@ -7,78 +7,60 @@ export default function OrderTrackingPage() {
   const [loading, setLoading] = useState(true);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
-
-  const restaurantId = '550e8400-e29b-41d4-a716-446655440000';
-  const orderId = 'order-2';
-  const ORDER_FLOW = [
-    { status: 0, description: "Order Confirmed", icon: "receipt_long" },
-    { status: 1, description: "Your order is being prepared", icon: "restaurant_menu" },
-    { status: 2, description: "Order picked up for delivery", icon: "local_shipping" },
-    { status: 3, description: "Order Delivered", icon: "check_circle" },
-  ];
-  function getEventTime(statusCode, order) {
-    const orderDate = new Date(order.orderDate + "T" + order.orderTime);
-
-    switch (statusCode) {
-      case 0: // Confirmed
-        return orderDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      case 1: // Preparing
-        return new Date(orderDate.getTime() + 3 * 60000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); // +3 min
-      case 2: // Out for delivery
-        return new Date(orderDate.getTime() + 15 * 60000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); // +15 min
-      case 3: // Delivered
-        return new Date(orderDate.getTime() + 30 * 60000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); // +30 min
-      default:
-        return "";
-    }
-  }
-
+  const [error, setError] = useState("");
+  const { id } = useParams();
+  
   useEffect(() => {
     async function loadOrder() {
-      const res = await getOrderDetailsAPI(restaurantId, orderId);
+      const res = await getOrderDetailsAPI(id);
 
       if (res.succeeded) {
         setOrder(res.data);
       } else {
         console.error(res.errorMessage);
+        setError(res.errorMessage);
       }
 
       setLoading(false);
     }
 
     loadOrder();
-  }, [restaurantId, orderId]);
+  }, [id]);
 
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-async function handleCancelOrder() {
-  setIsCancelling(true);
-  try {
-    const res = await cancelOrderAPI(order.restaurantId, order.id);
-    if (res.succeeded) {
+  async function handleCancelOrder() {
+    setIsCancelling(true);
+    try {
+      const res = await cancelOrderAPI(id);
+      if (res.succeeded) {
 
-      navigate("/public/restaurants");
-    } else {
-      console.error(res.errorMessage);
+        navigate("/public/restaurants");
+      } else {
+        console.error(res.errorMessage);
+        setIsCancelling(false);
+        setError(res.errorMessage);
+      }
+    } catch (err) {
+      console.error(err);
       setIsCancelling(false);
+
     }
-  } catch (err) {
-    console.error(err);
-    setIsCancelling(false);
   }
-}
 
 
   if (!order) return <p className="p-10 text-lg text-red-500">Order not found.</p>;
 
-  const items = order.items ?? [];
-  const client = order.customer; // {name, email, address}
-  const orderNo = order.orderNumber;
-  const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+  const products = order.products ?? [];
+  const clientName = order.clientName;
+  const clientAddress = order.deliveryAddress;
+  const clientEmail = order.clientEmail;
+  const orderNo = order.orderNo;
+  const subtotal = products.reduce((sum, item) => sum + item.total, 0);
   const deliveryFee = 5;
   const total = subtotal + deliveryFee;
-  const currentStatus = order.status;
-  const visibleHistory = ORDER_FLOW.filter(event => event.status <= currentStatus);
+  const currentStatus = order.orderStatus;
+  const statusHistory = order.statusHistory ?? [];
 
 
   const deliveryTime = new Date(order.deliveryTime);
@@ -88,17 +70,16 @@ async function handleCancelOrder() {
     Math.round((deliveryTime - now) / 60000)
   );
 
-  // Progress bar percentage
   const statusStages = ["confirmed", "preparing", "out for delivery", "delivered"];
   const progressIndexMap = {
-    0: 0, // New
-    1: 1, // Preparing
-    2: 2, // Out for Delivery
-    3: 3, // Delivered
-    [-1]: 0 // Cancelled
+    0: 0,
+    1: 1,
+    2: 2,
+    3: 3,
+    [-1]: 0
   };
 
-  const statusIndex = progressIndexMap[order.status] ?? 0;
+  const statusIndex = progressIndexMap[currentStatus] ?? 0;
   const progressPercent = ((statusIndex + 1) / 4) * 100;
   const statusLabel = statusStages[statusIndex];
 
@@ -111,6 +92,7 @@ async function handleCancelOrder() {
           Your order is <span className="text-orange-500">{statusLabel}</span>!
         </h1>
         <p className="text-2xl text-gray-600">Order Number: {orderNo}</p>
+        {error && <p className="text-red-500 mb-4">{error}</p>}
       </div>
 
       <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-10">
@@ -121,11 +103,11 @@ async function handleCancelOrder() {
           {/* Order Items */}
           <div className="bg-white border border-[#e7d9cf] rounded-xl shadow-sm">
             <h2 className="text-lg font-bold p-4 border-b border-[#e7d9cf]">
-              Order Items ({items.length})
+              Order Items ({products.length})
             </h2>
 
             <ul className="divide-y divide-[#e7d9cf]">
-              {items.map((item, i) => (
+              {products.map((item, i) => (
                 <li key={i} className="p-4 flex gap-4">
                   <img
                     src={item.imgUrl || "/placeholder-food.jpg"}
@@ -178,7 +160,7 @@ async function handleCancelOrder() {
           {order.status !== -1 && order.status !== 3 && (
             <button
               onClick={() => setIsCancelModalOpen(true)}
-               className="mt-4 inline-flex px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-bold text-sm rounded-lg mx-auto"
+              className="mt-4 inline-flex px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-bold text-sm rounded-lg mx-auto"
             >
               Cancel Order
             </button>
@@ -200,26 +182,39 @@ async function handleCancelOrder() {
             </p>
           </div>
 
-          {/* Order History */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <h2 className="text-lg font-bold mb-4">Order History</h2>
-            <ul className="space-y-4">
-              {visibleHistory.map((event, index) => (
-                <li key={index} className="flex items-start gap-4">
-                  <div className="w-6 h-6 flex items-center justify-center rounded-full bg-orange-500 text-white mt-1">
-                    <span className="material-symbols-outlined text-base">{event.icon}</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{event.description}</p>
-                    {/* For now, show approximate time based on order data */}
-                    <p className="text-sm text-gray-500">
-                      {getEventTime(event.status, order)}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+         <div className="bg-card-background-light rounded-xl p-6 shadow-sm border border-border-light">
+  <h2 className="text-lg font-bold text-text-light mb-4">
+    Order History
+  </h2>
+
+  <ul className="space-y-4">
+    {order.statusHistory
+      .sort((a, b) => new Date(b.timeStamp) - new Date(a.timeStamp))
+      .map((entry, index) => {
+        const info = STATUS_INFO[entry.status];
+        return (
+          <li key={index} className="flex items-start gap-4">
+            <div className="w-6 h-6 flex items-center justify-center rounded-full bg-orange-500 text-white mt-1">
+              <span className="material-symbols-outlined text-base ">
+                {info.icon}
+              </span>
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-text-light">
+                {info.label}
+              </p>
+              <p className="text-sm text-secondary-text-light">
+                {new Date(entry.timeStamp).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+          </li>
+        );
+      })}
+  </ul>
+</div>
 
           {/* Customer Details */}
           <div className="rounded-xl border border-gray-200/50 bg-white shadow-sm">
@@ -231,7 +226,7 @@ async function handleCancelOrder() {
                 <span className="material-symbols-outlined text-gray-500">person</span>
                 <div>
                   <p className="text-sm text-[#9a6c4c]">Name</p>
-                  <p className="font-medium text-[#1b130d]">{client.name}</p>
+                  <p className="font-medium text-[#1b130d]">{clientName}</p>
                 </div>
               </div>
 
@@ -239,7 +234,7 @@ async function handleCancelOrder() {
                 <span className="material-symbols-outlined text-gray-500">mail</span>
                 <div>
                   <p className="text-sm text-[#9a6c4c]">Email</p>
-                  <p className="font-medium text-[#1b130d]">{client.email}</p>
+                  <p className="font-medium text-[#1b130d]">{clientEmail}</p>
                 </div>
               </div>
 
@@ -247,7 +242,7 @@ async function handleCancelOrder() {
                 <span className="material-symbols-outlined text-gray-500 mt-0.5">home</span>
                 <div>
                   <p className="text-sm text-[#9a6c4c]">Delivery Address</p>
-                  <p className="font-medium text-[#1b130d]">{client.address}</p>
+                  <p className="font-medium text-[#1b130d]">{clientAddress}</p>
                 </div>
               </div>
             </div>
@@ -258,30 +253,30 @@ async function handleCancelOrder() {
       </div>
 
       {isCancelModalOpen && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-xl p-6 w-96 shadow-lg">
-      <h2 className="text-xl font-bold mb-4">Confirm Cancellation</h2>
-      <p className="mb-6">
-        Are you sure you want to cancel your order? You will not receive a refund.
-      </p>
-      <div className="flex justify-end gap-4">
-        <button
-          onClick={() => setIsCancelModalOpen(false)}
-          className="px-4 py-2 rounded-lg border border-gray-300"
-        >
-          Close
-        </button>
-        <button
-          onClick={handleCancelOrder}
-          className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
-          disabled={isCancelling}
-        >
-          {isCancelling ? "Cancelling..." : "Confirm"}
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-96 shadow-lg">
+            <h2 className="text-xl font-bold mb-4">Confirm Cancellation</h2>
+            <p className="mb-6">
+              Are you sure you want to cancel your order? You will not receive a refund.
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setIsCancelModalOpen(false)}
+                className="px-4 py-2 rounded-lg border border-gray-300"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleCancelOrder}
+                className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+                disabled={isCancelling}
+              >
+                {isCancelling ? "Cancelling..." : "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

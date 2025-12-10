@@ -64,7 +64,7 @@ export const router = createBrowserRouter([
                 )
             },
 
-             { path: "/public/order-tracking",
+             { path: "/public/order-tracking/:id",
                 element: (
                         < OrderTrackingPage/>
                 )
