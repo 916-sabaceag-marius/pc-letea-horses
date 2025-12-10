@@ -23,5 +23,14 @@ namespace Honse.Resources
                 .Where(p => p.Category.RestaurantId == restaurantId && p.IsEnabled)
                 .ToListAsync();
         }
+
+        public async Task<Product?> GetProductByIdPublic(Guid productId)
+        {
+            var query = dbSet.AsQueryable();
+            query = ApplyIncludes(query);
+
+            return await query
+                .FirstOrDefaultAsync(p => p.Id == productId);
+        }
     }
 }

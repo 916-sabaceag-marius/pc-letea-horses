@@ -115,6 +115,7 @@ builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IUserValidationEn
 builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IRestaurantValidationEngine, Honse.Engines.Validation.RestaurantValidationEngine>();
 builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IProductCategoryValidationEngine, Honse.Engines.Validation.ProductCategoryValidationEngine>();
 builder.Services.AddScoped<Honse.Engines.Filtering.Interfaces.IRestaurantFilteringEngine, Honse.Engines.Filtering.Restaurant.RestaurantFilteringEngine>();
+builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IOrderValidationEngine, Honse.Engines.Validation.OrderValidationEngine>();
 builder.Services.AddScoped<Honse.Engines.Filtering.Interfaces.IOrderFilteringEngine, Honse.Engines.Filtering.Order.OrderFilteringEngine>();
 
 

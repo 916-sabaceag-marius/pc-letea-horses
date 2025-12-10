@@ -1,3 +1,4 @@
+﻿using Honse.Global;
 using Honse.Resources.Interfaces.Entities;
 using Honse.Global.Order;
 using EntityOrder = Honse.Resources.Interfaces.Entities.Order;
@@ -6,6 +7,7 @@ namespace Honse.Managers.Interfaces
 {
     public interface IOrderManager
     {
+        Task<PlaceOrderResponse> PlaceOrder(PlaceOrderRequest request, Guid? userId);
         Task<EntityOrder> AddOrder(CreateOrderRequest request);
         Task<EntityOrder?> GetOrderById(Guid id, Guid userId);
         Task<EntityOrder?> GetOrderByIdPublic(Guid id);
@@ -66,5 +68,38 @@ namespace Honse.Managers.Interfaces
         public OrderStatus NewStatus { get; set; }
         public string? StatusNotes { get; set; }
         public Guid UserId { get; set; }
+    }
+
+    public class PlaceOrderRequest
+    {
+        public Guid RestaurantId { get; set; }
+
+        public string CustomerEmail { get; set; } = string.Empty;
+
+        public string CustomerName { get; set; } = string.Empty;
+
+        public string CustomerPhone { get; set; } = string.Empty;
+
+        public Address DeliveryAddress { get; set; } = new Address();
+
+        public List<OrderItemRequest> Products { get; set; } = new List<OrderItemRequest>();
+    }
+
+    public class OrderItemRequest
+    {
+        public Guid ProductId { get; set; }
+
+        public int Quantity { get; set; }
+    }
+
+    public class PlaceOrderResponse
+    {
+        public Guid OrderId { get; set; }
+
+        public Guid ConfirmationToken { get; set; }
+
+        public string Message { get; set; } = string.Empty;
+
+        public decimal TotalAmount { get; set; }
     }
 }

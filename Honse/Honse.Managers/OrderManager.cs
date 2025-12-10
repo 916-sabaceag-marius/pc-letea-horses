@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Honse.Managers.Interfaces;
 using Honse.Resources.Interfaces;
 using Honse.Resources.Interfaces.Entities;
@@ -10,13 +11,22 @@ namespace Honse.Managers
     {
         private readonly IOrderResource _orderResource;
         private readonly Engines.Filtering.Interfaces.IOrderFilteringEngine _orderFilteringEngine;
+        private readonly Resources.Interfaces.IRestaurantResource _restaurantResource;
+        private readonly Resources.Interfaces.IProductResource _productResource;
+        private readonly Engines.Validation.Interfaces.IOrderValidationEngine _orderValidationEngine;
 
         public OrderManager(
             IOrderResource orderResource,
-            Engines.Filtering.Interfaces.IOrderFilteringEngine orderFilteringEngine)
+            Engines.Filtering.Interfaces.IOrderFilteringEngine orderFilteringEngine,
+            Resources.Interfaces.IRestaurantResource restaurantResource,
+            Resources.Interfaces.IProductResource productResource,
+            Engines.Validation.Interfaces.IOrderValidationEngine orderValidationEngine)
         {
             _orderResource = orderResource;
             _orderFilteringEngine = orderFilteringEngine;
+            _restaurantResource = restaurantResource;
+            _productResource = productResource;
+            _orderValidationEngine = orderValidationEngine;
         }
 
         public async Task<Order> AddOrder(CreateOrderRequest request)
@@ -163,7 +173,7 @@ namespace Honse.Managers
                 order.DeliveryTime = DateTime.UtcNow;
             }
 
-            return (await _orderResource.Update(order.Id, order.UserId, order))!;
+            return (await _orderResource.Update(order.Id, order.UserId ?? Guid.Empty, order))!;
         }
 
         public async Task CancelOrderPublic(Guid id)
@@ -192,7 +202,7 @@ namespace Honse.Managers
             order.OrderStatus = Global.Order.OrderStatus.Cancelled;
             order.StatusHistory = System.Text.Json.JsonSerializer.Serialize(history);
 
-            await _orderResource.Update(order.Id, order.UserId, order);
+            await _orderResource.Update(order.Id, order.UserId ?? Guid.Empty, order);
         }
 
         public async Task<List<Order>> GetAllOrdersByRestaurant(Guid restaurantId, Guid userId)
@@ -211,6 +221,88 @@ namespace Honse.Managers
         private string GenerateOrderNumber()
         {
             return $"ORD-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString()[..8].ToUpper()}";
+        }
+
+        public async Task<PlaceOrderResponse> PlaceOrder(PlaceOrderRequest request, Guid? userId)
+        {
+            _orderValidationEngine.ValidatePlaceOrder(request.DeepCopyTo<Engines.Common.PlaceOrder>());
+
+            var restaurant = await _restaurantResource.GetByIdPublic(request.RestaurantId);
+            if (restaurant == null)
+                throw new ValidationException("Restaurant not found!");
+
+            if (!restaurant.IsEnabled)
+                throw new ValidationException("Restaurant is currently disabled!");
+
+            var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+            bool isOpen = currentTime >= restaurant.OpeningTime && currentTime <= restaurant.ClosingTime;
+
+            if (!isOpen)
+                throw new ValidationException($"Restaurant is currently closed. Opens at {restaurant.OpeningTime} and closes at {restaurant.ClosingTime}.");
+
+            decimal totalAmount = 0;
+            var orderProducts = new List<Global.Order.OrderProduct>();
+
+            foreach (var item in request.Products)
+            {
+                var product = await _productResource.GetProductByIdPublic(item.ProductId);
+                if (product == null)
+                    throw new ValidationException($"Product with ID {item.ProductId} not found!");
+
+                if (product.Category.RestaurantId != request.RestaurantId)
+                    throw new ValidationException($"Product '{product.Name}' does not belong to the selected restaurant!");
+
+                if (!product.IsEnabled)
+                    throw new ValidationException($"Product '{product.Name}' is currently unavailable!");
+
+                decimal subtotal = product.Price * item.Quantity;
+                totalAmount += subtotal;
+
+                orderProducts.Add(new Global.Order.OrderProduct
+                {
+                    Name = product.Name,
+                    Quantity = item.Quantity,
+                    Price = product.Price,
+                    VAT = product.VAT,
+                    Total = subtotal
+                });
+            }
+
+            var confirmationToken = Guid.NewGuid();
+            var order = new Order
+            {
+                Id = Guid.NewGuid(),
+                RestaurantId = request.RestaurantId,
+                UserId = userId,
+                OrderNo = confirmationToken.ToString(),
+                Timestamp = DateTime.UtcNow,
+                ClientName = request.CustomerName,
+                ClientEmail = request.CustomerEmail,
+                DeliveryAddress = System.Text.Json.JsonSerializer.Serialize(request.DeliveryAddress),
+                OrderStatus = Global.Order.OrderStatus.Unconfirmed,
+                Products = System.Text.Json.JsonSerializer.Serialize(orderProducts),
+                Total = totalAmount
+            };
+
+            order.StatusHistory = System.Text.Json.JsonSerializer.Serialize(new[]
+            {
+                new Global.Order.OrderStatusHistoryEntry
+                {
+                    Status = Global.Order.OrderStatus.Unconfirmed,
+                    Timestamp = DateTime.UtcNow,
+                    Notes = "Order placed, awaiting confirmation"
+                }
+            });
+
+            await _orderResource.Add(order);
+
+            return new PlaceOrderResponse
+            {
+                OrderId = order.Id,
+                ConfirmationToken = confirmationToken,
+                TotalAmount = totalAmount,
+                Message = "Order placed successfully! Please check your email for confirmation."
+            };
         }
     }
 }
