@@ -52,7 +52,6 @@ namespace Honse.Managers.Interfaces
 
         public bool IsOpen { get; set; }
 
-        // does the frontend wanna see this?
         public Guid? ConfigurationId { get; set; }
     }
 
@@ -79,7 +78,7 @@ namespace Honse.Managers.Interfaces
         public TimeOnly ClosingTime { get; set; }
 
         // replaced CategoryIds with this
-        public Guid ConfigurationId { get; set; }
+        public Guid? ConfigurationId { get; set; }
     }
 
     public class UpdateRestaurantRequest
@@ -109,7 +108,7 @@ namespace Honse.Managers.Interfaces
         public TimeOnly ClosingTime { get; set; }
 
         // replaced CategoryIds with this
-        public Guid ConfigurationId { get; set; }
+        public Guid? ConfigurationId { get; set; }
 
     }
 

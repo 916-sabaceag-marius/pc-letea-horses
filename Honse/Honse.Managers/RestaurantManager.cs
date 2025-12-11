@@ -39,22 +39,7 @@ namespace Honse.Managers
             restaurant.ConfigurationId = request.ConfigurationId;
 
             restaurant = await restaurantResource.Add(restaurant);
-            /*
-             commented loop that updates categoryIds
-            // Change the restaurant Ids for the categories in the request
-            foreach (Guid categoryId in request.CategoryIds)
-            {
-                var category = await productCategoryResource.GetByIdNoTracking(categoryId, request.UserId);
-
-                if (category != null)
-                {
-                    category.RestaurantId = restaurant.Id;
-                    category.Restaurant = null;
-                    
-                    await productCategoryResource.Update(categoryId, request.UserId, category);
-                }
-            }
-            */
+            
             return restaurant.DeepCopyTo<Interfaces.Restaurant>();
         }
 
@@ -129,39 +114,20 @@ namespace Honse.Managers
             restaurant.TotalReviews = existingRestaurant.TotalReviews;
 
             // assign the new configuration id
-            restaurant.ConfigurationId = request.ConfigurationId;
+            if(request.ConfigurationId.HasValue)
+            {
+                restaurant.ConfigurationId = request.ConfigurationId.Value;
+            }
+            else
+            {
+                restaurant.ConfigurationId = existingRestaurant.ConfigurationId;
+            }
 
             var updatedRestaurant = await restaurantResource.Update(request.Id, request.UserId, restaurant);
 
             if (updatedRestaurant == null)
                 throw new Exception("Couldn't update restaurant!");
-            /*
-             commented loop that updates categoryIds
-            // Get all restaurant categories, and 'unselect' the categories that aren't in the request
 
-            var categories = await productCategoryResource.GetRestaurantCategories(request.UserId, request.Id);
-
-            foreach (var category in categories.Where(category => !request.CategoryIds.Contains(category.Id)))
-            {
-                category.RestaurantId = null;
-
-                await productCategoryResource.Update(category.Id, request.UserId, category);
-            }
-
-            // Change the restaurant Ids for the categories in the request
-            foreach (Guid categoryId in request.CategoryIds.Where(id => !categories.Any(category => category.Id == id)))
-            {
-                var category = await productCategoryResource.GetByIdNoTracking(categoryId, request.UserId);
-
-                if (category != null)
-                {
-                    category.RestaurantId = restaurant.Id;
-                    category.Restaurant = null;
-
-                    await productCategoryResource.Update(category.Id, request.UserId, category);
-                }
-            }
-            */
             return updatedRestaurant.DeepCopyTo<Interfaces.Restaurant>();
         }
 

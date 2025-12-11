@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Honse.Resources.Interfaces
 {
-    internal interface IConfigurationResource
+    public interface IConfigurationResource : IResource<Entities.Configuration>
     {
     }
 }
