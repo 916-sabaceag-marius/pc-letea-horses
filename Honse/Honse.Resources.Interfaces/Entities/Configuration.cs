@@ -9,6 +9,6 @@ namespace Honse.Resources.Interfaces.Entities
     public class Configuration : Entity
     {
         public string Name { get; set; } = string.Empty;
-        public string SettingsJson { get; set; } = "{}"; // for extra settings
+        public List<Guid> CategoryIds { get; set; } = new List<Guid>();
     }
 }

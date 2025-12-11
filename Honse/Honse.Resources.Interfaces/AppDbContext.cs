@@ -45,6 +45,12 @@ namespace Honse.Resources.Interfaces
                 {
                     owned.ToJson();
                 });
+
+            //no need for .OwnsMany or .ToJson
+            //List<Guid> gets mapped automatically to a JSON Array in the SQL Server
+            modelBuilder.Entity<Configuration>()
+                .Property(c => c.CategoryIds);
+
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

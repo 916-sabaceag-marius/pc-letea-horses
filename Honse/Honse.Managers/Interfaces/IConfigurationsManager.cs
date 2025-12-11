@@ -19,7 +19,7 @@ namespace Honse.Managers.Interfaces
     {
         public Guid UserId { get; set; }
         public string Name { get; set; } = string.Empty;
-        public string SettingsJson { get; set; } = string.Empty;
+        public List<Guid> CategoryIds { get; set; } = new List<Guid>();
     }
 
     public class UpdateConfigurationRequest
@@ -27,6 +27,6 @@ namespace Honse.Managers.Interfaces
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public string Name { get; set; } = string.Empty;
-        public string SettingsJson { get; set; } = string.Empty;
+        public List<Guid> CategoryIds { get; set; } = new List<Guid>();
     }
 }

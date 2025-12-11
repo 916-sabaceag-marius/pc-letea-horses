@@ -6,8 +6,8 @@ BEGIN
 	CREATE TABLE [Configuration](
 		[Id] UNIQUEIDENTIFIER PRIMARY KEY NONCLUSTERED DEFAULT NEWID(),
 		[UserId] UNIQUEIDENTIFIER NOT NULL,
-		[Name] VARCHAR(255) NOT NULL,
-		[SettingsJson] VARCHAR(MAX) NOT NULL DEFAULT '{}',
+		[Name] NVARCHAR(255) NOT NULL,
+		[CategoryIds] NVARCHAR(MAX) NOT NULL DEFAULT '[]',
 
 		-- link to the user who owns this config
 		CONSTRAINT [FK_Configuration_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id])

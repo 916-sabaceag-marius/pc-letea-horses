@@ -34,11 +34,23 @@ namespace Honse.Managers
         {
             var config = request.DeepCopyTo<Configuration>();
             config.Id = Guid.NewGuid();
+
+            if(config.CategoryIds == null)
+            {
+                config.CategoryIds = new List<Guid>();
+            }
+
             return await _configurationResource.Add(config);
         }
         public async Task<Configuration> UpdateConfiguration(UpdateConfigurationRequest request)
         {
             var config = request.DeepCopyTo<Configuration>();
+
+            if(config.CategoryIds == null)
+            {
+                config.CategoryIds = new List<Guid>();
+            }
+
             var updated = await _configurationResource.Update(request.Id, request.UserId, config);
 
             if (updated == null) throw new Exception("Configuration not found!");
