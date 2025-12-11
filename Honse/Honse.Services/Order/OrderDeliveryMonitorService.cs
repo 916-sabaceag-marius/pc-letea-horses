@@ -5,12 +5,12 @@ using Microsoft.Extensions.Hosting;
 
 namespace Honse.Services.Order
 {
-    public class OrderPreparationMonitorService : BackgroundService
+    public class OrderDeliveryMonitorService : BackgroundService
     {
         private readonly IServiceProvider serviceProvider;
         private readonly TimeSpan interval = TimeSpan.FromMinutes(1);
 
-        public OrderPreparationMonitorService(IServiceProvider provider)
+        public OrderDeliveryMonitorService(IServiceProvider provider)
         {
             serviceProvider = provider;
         }
@@ -24,24 +24,22 @@ namespace Honse.Services.Order
 
                 var now = DateTime.UtcNow;
 
-                var overdueOrders = db.Order
-                    .Where(o => o.OrderStatus == OrderStatus.Accepted && o.PreparationTime != null &&
-                                o.PreparationTime < now);
+                var finishedOrders = db.Order
+                    .Where(o => o.OrderStatus == OrderStatus.Delivery && o.DeliveryTime != null &&
+                                o.DeliveryTime < now);
 
-                if (overdueOrders.Any())
+                if (finishedOrders.Any())
                 {
-                    int count = overdueOrders.Count();
-
-                    foreach (var order in overdueOrders)
+                    int count = finishedOrders.Count();
+                    foreach (var order in finishedOrders)
                     {
-                        //order.PreparationTimeMinutes += 15; ?
-                        order.PreparationTime =
-                            order.PreparationTime.Value.AddMinutes(15);
+                        order.OrderStatus = OrderStatus.Finished;
+                        // Add to status history
                     }
 
                     await db.SaveChangesAsync(stoppingToken);
 
-                    Console.WriteLine($"OrderPreparationMonitorService: updated preparation time for {count} orders");
+                    Console.WriteLine($"OrderDeliveryMonitorService: finished delivery for {count} orders");
                 }
 
                 await Task.Delay(interval, stoppingToken);

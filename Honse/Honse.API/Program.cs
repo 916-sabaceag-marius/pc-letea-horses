@@ -130,6 +130,7 @@ builder.Services.AddScoped<Honse.Managers.Interfaces.IOrderManager, Honse.Manage
 builder.Services.AddTransient<IEmailSender, Honse.Services.Email.EmailSenderService>();
 builder.Services.AddHostedService<Honse.Services.Order.OrderConfirmationCleanupService>();
 builder.Services.AddHostedService<Honse.Services.Order.OrderPreparationMonitorService>();
+builder.Services.AddHostedService<Honse.Services.Order.OrderDeliveryMonitorService>();
 
 
 var app = builder.Build();
