@@ -35,8 +35,12 @@ namespace Honse.Managers
 
             restaurant.Id = Guid.NewGuid();
 
-            restaurant = await restaurantResource.Add(restaurant);
+            // set the ConfigurationId from req
+            restaurant.ConfigurationId = request.ConfigurationId;
 
+            restaurant = await restaurantResource.Add(restaurant);
+            /*
+             commented loop that updates categoryIds
             // Change the restaurant Ids for the categories in the request
             foreach (Guid categoryId in request.CategoryIds)
             {
@@ -50,7 +54,7 @@ namespace Honse.Managers
                     await productCategoryResource.Update(categoryId, request.UserId, category);
                 }
             }
-
+            */
             return restaurant.DeepCopyTo<Interfaces.Restaurant>();
         }
 
@@ -124,11 +128,15 @@ namespace Honse.Managers
             restaurant.AverageRating = existingRestaurant.AverageRating;
             restaurant.TotalReviews = existingRestaurant.TotalReviews;
 
+            // assign the new configuration id
+            restaurant.ConfigurationId = request.ConfigurationId;
+
             var updatedRestaurant = await restaurantResource.Update(request.Id, request.UserId, restaurant);
 
             if (updatedRestaurant == null)
                 throw new Exception("Couldn't update restaurant!");
-
+            /*
+             commented loop that updates categoryIds
             // Get all restaurant categories, and 'unselect' the categories that aren't in the request
 
             var categories = await productCategoryResource.GetRestaurantCategories(request.UserId, request.Id);
@@ -153,7 +161,7 @@ namespace Honse.Managers
                     await productCategoryResource.Update(category.Id, request.UserId, category);
                 }
             }
-
+            */
             return updatedRestaurant.DeepCopyTo<Interfaces.Restaurant>();
         }
 
