@@ -108,6 +108,7 @@ builder.Services.AddScoped<Honse.Resources.Interfaces.IProductCategoryResource, 
 builder.Services.AddScoped<Honse.Resources.Interfaces.IRestaurantResource, Honse.Resources.RestaurantResource>();
 builder.Services.AddScoped<Honse.Resources.Interfaces.IOrderResource, Honse.Resources.OrderResource>();
 builder.Services.AddScoped<Honse.Resources.Interfaces.IConfigurationResource, Honse.Resources.ConfigurationResource>();
+builder.Services.AddScoped<Honse.Resources.Interfaces.IOrderConfirmationTokenResource, Honse.Resources.OrderConfirmationTokenResource>();
 
 // Engines
 builder.Services.AddScoped<Honse.Engines.Filtering.Interfaces.IProductFilteringEngine, Honse.Engines.Filtering.Product.ProductFilteringEngine>();
@@ -118,8 +119,6 @@ builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IProductCategoryV
 builder.Services.AddScoped<Honse.Engines.Filtering.Interfaces.IRestaurantFilteringEngine, Honse.Engines.Filtering.Restaurant.RestaurantFilteringEngine>();
 builder.Services.AddScoped<Honse.Engines.Filtering.Interfaces.IOrderFilteringEngine, Honse.Engines.Filtering.Order.OrderFilteringEngine>();
 
-
-// Managers
 // Managers
 builder.Services.AddScoped<Honse.Managers.Interfaces.IUserManager, Honse.Managers.UserManager>();
 builder.Services.AddScoped<Honse.Managers.Interfaces.IProductManager, Honse.Managers.ProductManager>();
@@ -131,6 +130,10 @@ builder.Services.AddScoped<Honse.Managers.Interfaces.IConfigurationsManager, Hon
 // Services
 
 builder.Services.AddTransient<IEmailSender, Honse.Services.Email.EmailSenderService>();
+builder.Services.AddHostedService<Honse.Services.Order.OrderConfirmationCleanupService>();
+builder.Services.AddHostedService<Honse.Services.Order.OrderPreparationMonitorService>();
+builder.Services.AddHostedService<Honse.Services.Order.OrderDeliveryMonitorService>();
+
 
 var app = builder.Build();
 
