@@ -79,7 +79,7 @@ namespace Honse.Managers
         /// 
         public async Task CancelOrder(Guid id, Guid? userId)
         {
-            var order = (userId != null ? await orderResource.GetById(id, userId.Value) : await orderResource.GetByIdPublic(id))
+            Order order = (userId != null ? await orderResource.GetById(id, userId.Value) : await orderResource.GetByIdPublic(id))
                 ?? throw new InvalidOperationException("Order not found");
 
             // Check if order can be cancelled (only if not finished or already cancelled)
