@@ -117,6 +117,7 @@ builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IRestaurantValida
 builder.Services.AddScoped<Honse.Engines.Validation.Interfaces.IProductCategoryValidationEngine, Honse.Engines.Validation.ProductCategoryValidationEngine>();
 builder.Services.AddScoped<Honse.Engines.Filtering.Interfaces.IRestaurantFilteringEngine, Honse.Engines.Filtering.Restaurant.RestaurantFilteringEngine>();
 builder.Services.AddScoped<Honse.Engines.Filtering.Interfaces.IOrderFilteringEngine, Honse.Engines.Filtering.Order.OrderFilteringEngine>();
+builder.Services.AddScoped<Honse.Engines.Processing.Interfaces.IOrderProcessorEngine, Honse.Engines.Processing.OrderProcessorEngine>();
 
 // Managers
 builder.Services.AddScoped<Honse.Managers.Interfaces.IUserManager, Honse.Managers.UserManager>();

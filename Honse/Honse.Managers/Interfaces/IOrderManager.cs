@@ -38,9 +38,11 @@ namespace Honse.Managers.Interfaces
        
         public Guid RestaurantId { get; set; }
         
-        public OrderStatus NewStatus { get; set; }
+        public OrderStatus NextStatus { get; set; }
         
         public string? StatusNotes { get; set; }
+
+        public int PreparationTimeMinutes { get; set; }
         
         public Guid UserId { get; set; }
     }

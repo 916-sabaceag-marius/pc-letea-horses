@@ -2,7 +2,7 @@ using Honse.Managers.Interfaces;
 using Honse.Resources.Interfaces;
 using Honse.Resources.Interfaces.Entities;
 using Honse.Global.Extensions;
-using Honse.Global;
+using Honse.Engines.Processing.Interfaces;
 
 namespace Honse.Managers
 {
@@ -10,17 +10,20 @@ namespace Honse.Managers
     {
         private readonly IOrderResource orderResource;
         private readonly Engines.Filtering.Interfaces.IOrderFilteringEngine orderFilteringEngine;
+        private readonly IOrderProcessorEngine orderProcessorEngine;
         private readonly Resources.Interfaces.IRestaurantResource restaurantResource;
         private readonly Resources.Interfaces.IProductResource productResource;
 
         public OrderManager(
             IOrderResource orderResource,
             Engines.Filtering.Interfaces.IOrderFilteringEngine orderFilteringEngine,
+            Engines.Processing.Interfaces.IOrderProcessorEngine orderProcessorEngine,
             Resources.Interfaces.IRestaurantResource restaurantResource,
             Resources.Interfaces.IProductResource productResource)
         {
             this.orderResource = orderResource;
             this.orderFilteringEngine = orderFilteringEngine;
+            this.orderProcessorEngine = orderProcessorEngine;
             this.restaurantResource = restaurantResource;
             this.productResource = productResource;
         }
@@ -31,7 +34,6 @@ namespace Honse.Managers
             return order;
         }
 
-        //TODO: Move to OrderProcessorEngine
         public async Task<Order> ProcessOrder(OrderProcessRequest request)
         {
             var order = await orderResource.GetById(request.Id, request.UserId)
@@ -41,33 +43,11 @@ namespace Honse.Managers
             if (order.RestaurantId != request.RestaurantId)
                 throw new UnauthorizedAccessException("Order does not belong to this restaurant");
 
-            // Update status
-            var history = System.Text.Json.JsonSerializer.Deserialize<List<Global.Order.OrderStatusHistoryEntry>>(order.StatusHistory) 
-                ?? new List<Global.Order.OrderStatusHistoryEntry>();
-            
-            history.Add(new Global.Order.OrderStatusHistoryEntry
-            {
-                Status = request.NewStatus,
-                Timestamp = DateTime.UtcNow,
-                Notes = request.StatusNotes
-            });
-
-            order.OrderStatus = request.NewStatus;
-            order.StatusHistory = System.Text.Json.JsonSerializer.Serialize(history);
-
-            // Update preparation time when status becomes Accepted
-            if (request.NewStatus == Global.Order.OrderStatus.Accepted && !order.PreparationTime.HasValue)
-            {
-                order.PreparationTime = DateTime.UtcNow;
-            }
-
-            // Update delivery time when status becomes Finished
-            if (request.NewStatus == Global.Order.OrderStatus.Finished && !order.DeliveryTime.HasValue)
-            {
-                order.DeliveryTime = DateTime.UtcNow;
-            }
+            order = orderProcessorEngine.ProcessOrder(order.DeepCopyTo<Global.Order.Order>(), request.NextStatus, request.PreparationTimeMinutes, request.StatusNotes).DeepCopyTo<Order>();
 
             return (await orderResource.Update(order.Id, order.UserId, order))!;
+
+            //SignalR
         }
 
         /// <summary>
@@ -82,28 +62,11 @@ namespace Honse.Managers
             Order order = (userId != null ? await orderResource.GetById(id, userId.Value) : await orderResource.GetByIdPublic(id))
                 ?? throw new InvalidOperationException("Order not found");
 
-            // Check if order can be cancelled (only if not finished or already cancelled)
-            if (order.OrderStatus == Global.Order.OrderStatus.Finished ||
-                order.OrderStatus == Global.Order.OrderStatus.Cancelled)
-            {
-                throw new InvalidOperationException($"Cannot cancel order with status: {order.OrderStatus}");
-            }
-
-            // Mark as cancelled
-            var history = System.Text.Json.JsonSerializer.Deserialize<List<Global.Order.OrderStatusHistoryEntry>>(order.StatusHistory) 
-                ?? new List<Global.Order.OrderStatusHistoryEntry>();
-            
-            history.Add(new Global.Order.OrderStatusHistoryEntry
-            {
-                Status = Global.Order.OrderStatus.Cancelled,
-                Timestamp = DateTime.UtcNow,
-                Notes = "Order cancelled by customer"
-            });
-
-            order.OrderStatus = Global.Order.OrderStatus.Cancelled;
-            order.StatusHistory = System.Text.Json.JsonSerializer.Serialize(history);
+            order = orderProcessorEngine.CancelOrder(order.DeepCopyTo<Global.Order.Order>()).DeepCopyTo<Order>();
 
             await orderResource.Update(order.Id, order.UserId, order);
+
+            // SignalR
         }
 
         public async Task<List<Order>> GetAllOrdersByRestaurant(Guid restaurantId, Guid userId)
