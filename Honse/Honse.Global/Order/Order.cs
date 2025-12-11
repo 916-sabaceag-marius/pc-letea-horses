@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
 namespace Honse.Global.Order
 {
@@ -12,7 +12,7 @@ namespace Honse.Global.Order
         public string ClientName { get; set; } = string.Empty;
         public string ClientEmail { get; set; } = string.Empty;
         public string DeliveryAddress { get; set; } = string.Empty;
-        public OrderStatus OrderStatus { get; set; } = OrderStatus.New;
+        public OrderStatus OrderStatus { get; set; }
         public string StatusHistory { get; set; } = string.Empty; // JSON array of status changes
         public string Products { get; set; } = string.Empty; // JSON array of products
         public decimal Total { get; set; }
@@ -27,6 +27,7 @@ namespace Honse.Global.Order
         public decimal Price { get; set; }
         public decimal VAT { get; set; }
         public decimal Total { get; set; }
+        public string Image { get; set; } = string.Empty;
     }
 
     public class OrderStatusHistoryEntry
