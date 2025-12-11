@@ -155,6 +155,9 @@ namespace Honse.Managers.Interfaces
         public string Description { get; set; } = string.Empty;
         public string Image { get; set; } = string.Empty;
         public string CuisineType { get; set; } = string.Empty;
+
+        // settings json -> frontend
+        public Resources.Interfaces.Entities.Configuration? Configuration { get; set; }
         public List<MenuCategory> Categories { get; set; } = new List<MenuCategory>();
     }
 

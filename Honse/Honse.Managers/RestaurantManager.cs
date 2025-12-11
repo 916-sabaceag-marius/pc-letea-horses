@@ -155,7 +155,10 @@ namespace Honse.Managers
                 Name = restaurant.Name,
                 Description = restaurant.Description,
                 Image = restaurant.Image,
-                CuisineType = restaurant.CuisineType
+                CuisineType = restaurant.CuisineType,
+
+                // new mapping
+                Configuration = restaurant.Configuration
             };
 
             // Group products by category
