@@ -1,7 +1,5 @@
 using Honse.Global;
-using Honse.Resources.Interfaces.Entities;
 using Honse.Global.Order;
-using Order = Honse.Resources.Interfaces.Entities.Order;
 
 namespace Honse.Managers.Interfaces
 {

@@ -150,4 +150,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapHub<Honse.Services.Hub.OrderingHub>("/api/orderinghub");
+
 app.Run();
