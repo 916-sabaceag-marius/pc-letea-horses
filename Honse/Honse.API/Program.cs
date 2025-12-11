@@ -133,6 +133,7 @@ builder.Services.AddHostedService<Honse.Services.Order.OrderConfirmationCleanupS
 builder.Services.AddHostedService<Honse.Services.Order.OrderPreparationMonitorService>();
 builder.Services.AddHostedService<Honse.Services.Order.OrderDeliveryMonitorService>();
 
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
