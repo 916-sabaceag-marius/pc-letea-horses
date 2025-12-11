@@ -102,6 +102,20 @@ export async function cancelOrderAPI(orderId) {
     }
 }
 
+export async function confirmOrderAPI(id) {
+    try {
+        await new Promise(resolve => setTimeout(resolve, 10000));
+       // const res = await api.post(`/api/public/confirm/${id}`);
+         const order = MOCK_ORDERS.find(o => o.id === id);
+          if (!order) {
+            return failure("On no! Order confirmation link expired");
+        }
+        return successData();
+    } catch (err) {
+        return failure(parseError(err, "Failed to confirm order"));
+    }
+}
+
 const MOCK_ORDERS = [
     {
         id: "order-1",
@@ -115,9 +129,9 @@ const MOCK_ORDERS = [
             { id: "1", name: "Margherita Pizza", quantity: 1, price: 12.99, vat:9, total:12.99, imgUrl: 'https://i.pinimg.com/736x/68/ef/90/68ef9032fae3d204d6f5bb72221d9b6e.jpg' },
             { id: "1", name: "Cola", quantity: 1, price: 5.99, vat:9, total:5.99, imgUrl: 'https://i.pinimg.com/736x/68/ef/90/68ef9032fae3d204d6f5bb72221d9b6e.jpg' },
         ],
-        deliveryTime: "2025-12-10T16:45:00",
-        timeStamp: "2025-12-10T16:45:00",
-        preparationTime: "2025-12-10T16:45:00",
+        deliveryTime: "2025-12-11T16:45:00",
+        timeStamp: "2025-12-11T16:45:00",
+        preparationTime: "2025-12-11T16:45:00",
         total: 70,
         statusHistory: [
             {status: OrderStatus.New , timeStamp: "2025-12-10T16:01:00" , notes: ""},

@@ -16,6 +16,7 @@ import AddRestaurantPage from '../pages/private/restaurants/AddRestaurantPage';
 import OrderTrackingPage from '../pages/public/OrderTrackingPage/OrderTrackingPage';
 import CheckoutPage from "../pages/public/Checkout/CheckoutPage";
 import OrderEmailConfirmationPage from "../pages/public/Checkout/OrderEmailConfirmationPage";
+import ConfirmOrderPage from '../pages/public/OrderTrackingPage/ConfirmOrderPage';
 export const router = createBrowserRouter([
     {
         path: "/",
@@ -67,6 +68,12 @@ export const router = createBrowserRouter([
              { path: "/public/order-tracking/:id",
                 element: (
                         < OrderTrackingPage/>
+                )
+            },
+            
+             { path: "/public/confirm-order/:id",
+                element: (
+                        <ConfirmOrderPage/>
                 )
             },
 

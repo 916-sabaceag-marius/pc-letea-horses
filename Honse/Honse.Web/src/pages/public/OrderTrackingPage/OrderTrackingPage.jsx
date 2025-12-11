@@ -9,7 +9,7 @@ export default function OrderTrackingPage() {
   const [isCancelling, setIsCancelling] = useState(false);
   const [error, setError] = useState("");
   const { id } = useParams();
-  
+  const [minutesRemaining, setMinutesRemaining] = useState(0);
   useEffect(() => {
     async function loadOrder() {
       const res = await getOrderDetailsAPI(id);
@@ -48,7 +48,20 @@ export default function OrderTrackingPage() {
     }
   }
 
+  useEffect(() => {
+     if (!order) return; 
+  const deliveryTime = new Date(order.deliveryTime);
+  setMinutesRemaining(Math.max(0, Math.round((deliveryTime - new Date()) / 60000)));
 
+  const interval = setInterval(() => {
+    const newMinutes = Math.max(0, Math.round((deliveryTime - new Date()) / 60000));
+    setMinutesRemaining(newMinutes);
+  }, 60_000);
+
+  return () => clearInterval(interval);
+}, [order]);
+
+  if (loading) return <p className="p-10 text-lg text-gray-500">Loading...</p>;
   if (!order) return <p className="p-10 text-lg text-red-500">Order not found.</p>;
 
   const products = order.products ?? [];
@@ -61,15 +74,7 @@ export default function OrderTrackingPage() {
   const total = subtotal + deliveryFee;
   const currentStatus = order.orderStatus;
   const statusHistory = order.statusHistory ?? [];
-
-
   const deliveryTime = new Date(order.deliveryTime);
-  const now = new Date();
-  const minutesRemaining = Math.max(
-    0,
-    Math.round((deliveryTime - now) / 60000)
-  );
-
   const statusStages = ["confirmed", "preparing", "out for delivery", "delivered"];
   const progressIndexMap = {
     0: 0,
@@ -188,7 +193,7 @@ export default function OrderTrackingPage() {
   </h2>
 
   <ul className="space-y-4">
-    {order.statusHistory
+    {statusHistory
       .sort((a, b) => new Date(b.timeStamp) - new Date(a.timeStamp))
       .map((entry, index) => {
         const info = STATUS_INFO[entry.status];
