@@ -14,6 +14,9 @@ import AddProductPage from '../pages/private/products/AddProductPage';
 import AllRestaurantsPage from '../pages/private/restaurants/AllRestaurantsPage';
 import AddRestaurantPage from '../pages/private/restaurants/AddRestaurantPage';
 import OrderTrackingPage from '../pages/public/OrderTrackingPage/OrderTrackingPage';
+import AllOrdersPage from '../pages/private/orders/AllOrdersPage';
+import OrderDetailsPage from '../pages/private/orders/OrderDetailsPage';
+
 import CheckoutPage from "../pages/public/Checkout/CheckoutPage";
 import OrderEmailConfirmationPage from "../pages/public/Checkout/OrderEmailConfirmationPage";
 import ConfirmOrderPage from '../pages/public/OrderTrackingPage/ConfirmOrderPage';
@@ -135,6 +138,24 @@ export const router = createBrowserRouter([
                 ),
             },
 
+            // Orders management routes
+            {
+                path: "/orders",
+                element: (
+                    <AuthenticatedRoute redirectPage="/public/login">
+                        <AllOrdersPage />
+                    </AuthenticatedRoute>
+                ),
+            },
+            
+            {
+                path: "/orders/:orderId",
+                element: (
+                    <AuthenticatedRoute redirectPage="/public/login">
+                        <OrderDetailsPage />
+                    </AuthenticatedRoute>
+                ),
+            },
 
             // Restaurants page: /restaurants
 
