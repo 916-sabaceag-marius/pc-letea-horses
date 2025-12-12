@@ -51,6 +51,23 @@ namespace Honse.Resources.Interfaces
             modelBuilder.Entity<Configuration>()
                 .Property(c => c.CategoryIds);
 
+            modelBuilder.Entity<Order>()
+                .OwnsOne(r => r.DeliveryAddress, owned =>
+                {
+                    owned.ToJson();
+                });
+
+            modelBuilder.Entity<Order>()
+                .OwnsMany(r => r.Products, owned =>
+                {
+                    owned.ToJson();
+                });
+
+            modelBuilder.Entity<Order>()
+                .OwnsMany(r => r.StatusHistory, owned =>
+                {
+                    owned.ToJson();
+                });
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

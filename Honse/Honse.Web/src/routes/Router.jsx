@@ -13,8 +13,13 @@ import AllProductsPage from '../pages/private/products/AllProductsPage';
 import AddProductPage from '../pages/private/products/AddProductPage';
 import AllRestaurantsPage from '../pages/private/restaurants/AllRestaurantsPage';
 import AddRestaurantPage from '../pages/private/restaurants/AddRestaurantPage';
+import OrderTrackingPage from '../pages/public/OrderTrackingPage/OrderTrackingPage';
+import AllOrdersPage from '../pages/private/orders/AllOrdersPage';
+import OrderDetailsPage from '../pages/private/orders/OrderDetailsPage';
+
 import CheckoutPage from "../pages/public/Checkout/CheckoutPage";
 import OrderEmailConfirmationPage from "../pages/public/Checkout/OrderEmailConfirmationPage";
+import ConfirmOrderPage from '../pages/public/OrderTrackingPage/ConfirmOrderPage';
 export const router = createBrowserRouter([
     {
         path: "/",
@@ -60,6 +65,18 @@ export const router = createBrowserRouter([
                     <UnauthenticatedRoute redirectPage='/public'>
                         <RegisterPage />
                     </UnauthenticatedRoute>
+                )
+            },
+
+             { path: "/public/order-tracking/:id",
+                element: (
+                        < OrderTrackingPage/>
+                )
+            },
+            
+             { path: "/public/confirm-order/:id",
+                element: (
+                        <ConfirmOrderPage/>
                 )
             },
 
@@ -121,6 +138,24 @@ export const router = createBrowserRouter([
                 ),
             },
 
+            // Orders management routes
+            {
+                path: "/orders",
+                element: (
+                    <AuthenticatedRoute redirectPage="/public/login">
+                        <AllOrdersPage />
+                    </AuthenticatedRoute>
+                ),
+            },
+            
+            {
+                path: "/orders/:orderId",
+                element: (
+                    <AuthenticatedRoute redirectPage="/public/login">
+                        <OrderDetailsPage />
+                    </AuthenticatedRoute>
+                ),
+            },
 
             // Restaurants page: /restaurants
 
