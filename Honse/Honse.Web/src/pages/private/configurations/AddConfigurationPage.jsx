@@ -23,6 +23,7 @@ export default function AddConfigurationPage() {
   useEffect(() => {
     async function load() {
       setLoading(true);
+      setError("");
 
       try {
         const catRes = await getAllCategoriesAPI();
@@ -33,8 +34,11 @@ export default function AddConfigurationPage() {
             const normalized = list.map((c) => ({ ...c, id: String(c.id) }));
             setCategories(normalized);
           }
+        } else {
+          console.error("Failed to load categories:", catRes.errorMessage);
         }
       } catch (err) {
+        console.error("Error loading categories:", err);
       }
 
       if (!id) {
@@ -42,32 +46,31 @@ export default function AddConfigurationPage() {
         return;
       }
 
-      let assignedIds = [];
       try {
-        const byRes = await getCategoriesByConfigurationAPI(id);
-        if (byRes.succeeded) {
-          const rawBy = byRes.data;
-          const listBy = rawBy?.result || rawBy?.data || rawBy || [];
-          if (Array.isArray(listBy) && listBy.length > 0) {
-            assignedIds = listBy.map((c) => String(c.id));
-            setSelectedCategoryIds(assignedIds);
+        const result = await getConfigurationByIdAPI(id);
+        console.log("Configuration data received:", result);
+        
+        if (result.succeeded) {
+          const data = result.data || {};
+          console.log("Setting configuration:", data);
+          setConfiguration({ name: data.name || "" });
+          
+          // Set category IDs
+          let ids = [];
+          if (Array.isArray(data.categories)) {
+            ids = data.categories.map((c) => String(c.id || c));
+          } else if (Array.isArray(data.categoryIds)) {
+            ids = data.categoryIds.map(String);
           }
+          console.log("Setting category IDs:", ids);
+          setSelectedCategoryIds(ids);
+        } else {
+          console.error("Failed to load configuration:", result.errorMessage);
+          setError(result.errorMessage || "Failed to load configuration");
         }
       } catch (err) {
-      }
-
-      const result = await getConfigurationByIdAPI(id);
-      if (result.succeeded) {
-        const data = result.data || {};
-        setConfiguration(data);
-        if (assignedIds.length === 0) {
-          let ids = [];
-          if (Array.isArray(data.categories)) ids = data.categories.map((c) => String(c.id || c));
-          else if (Array.isArray(data.categoryIds)) ids = data.categoryIds.map(String);
-          setSelectedCategoryIds(ids.map(String));
-        }
-      } else {
-        setError(result.errorMessage || "Failed to load configuration");
+        console.error("Error loading configuration:", err);
+        setError("Error loading configuration: " + (err.message || "Unknown error"));
       }
 
       setLoading(false);
@@ -90,25 +93,37 @@ export default function AddConfigurationPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
+    setError("");
     try {
       const token = localStorage.getItem("token");
       const userId = token ? jwtDecode(token).sub : undefined;
 
       const payload = {
+        ...(id && { id }), // Include id for updates
         name: configuration.name,
         userId,
         categoryIds: selectedCategoryIds && selectedCategoryIds.length > 0 ? selectedCategoryIds : [],
       };
 
+      console.log("Submitting payload:", payload);
+
+      let result;
       if (!id) {
-        await addConfigurationAPI(payload);
+        result = await addConfigurationAPI(payload);
       } else {
-        await updateConfigurationAPI(id, payload);
+        result = await updateConfigurationAPI(id, payload);
       }
 
-      navigate("/configurations");
+      console.log("API result:", result);
+
+      if (result.succeeded) {
+        navigate("/configurations");
+      } else {
+        setError(result.errorMessage || "Failed to save configuration.");
+      }
     } catch (err) {
-      setError("Failed to save configuration.");
+      console.error("Submit error:", err);
+      setError("Failed to save configuration: " + (err.message || "Unknown error"));
     } finally {
       setLoading(false);
     }

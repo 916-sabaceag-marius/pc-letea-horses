@@ -35,78 +35,49 @@ function successData(data, extra = {}) {
   return { succeeded: true, data, ...extra };
 }
 
-const MOCK_CATEGORIES = [
-  { id: "cat-1", name: "Pizza & Pasta" },
-  { id: "cat-2", name: "Burgers & Sandwiches" },
-  { id: "cat-3", name: "Salads" },
-  { id: "cat-4", name: "Desserts" },
-  { id: "cat-5", name: "Beverages" },
-  { id: "cat-6", name: "Appetizers" },
-];
-
-let MOCK_CONFIGURATIONS = [
-  {
-    id: "config-1",
-    userId: "user-1",
-    name: "Italian Configuration",
-    categoryIds: ["cat-1"],
-    createdDate: new Date(2025, 11, 1).toISOString(),
-  },
-  {
-    id: "config-2",
-    userId: "user-1",
-    name: "American Configuration",
-    categoryIds: ["cat-2", "cat-4"],
-    createdDate: new Date(2025, 11, 5).toISOString(),
-  },
-  {
-    id: "config-3",
-    userId: "user-1",
-    name: "Healthy Configuration",
-    categoryIds: ["cat-3", "cat-5"],
-    createdDate: new Date(2025, 11, 8).toISOString(),
-  },
-];
-
-
-let MOCK_RESTAURANTS_CONFIG = {
-  "restaurant-1": "config-1", 
-  "restaurant-2": "config-2", 
-};
-
-
-const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export async function getConfigurationsAPI({ userId, searchKey = "", pageNumber = 1, pageSize = 10 }) {
-  await delay();
-  
-  let filtered = MOCK_CONFIGURATIONS.filter((c) => c.userId === userId);
-  
-  if (searchKey) {
-    filtered = filtered.filter((c) =>
-      c.name.toLowerCase().includes(searchKey.toLowerCase())
-    );
+  try {
+    const res = await api.get("/api/configurations");
+    let items = Array.isArray(res.data) ? res.data : [];
+
+    if (userId) {
+      items = items.filter((c) => c.userId === userId);
+    }
+
+    if (searchKey) {
+      const sk = searchKey.toLowerCase();
+      items = items.filter((c) => (c.name || "").toLowerCase().includes(sk));
+    }
+
+    const totalCount = items.length;
+    const startIndex = Math.max(0, (pageNumber - 1) * pageSize);
+    const paginated = items.slice(startIndex, startIndex + pageSize);
+
+    return successData(paginated, {
+      configurations: paginated,
+      totalCount,
+      pageNumber,
+    });
+  } catch (err) {
+    return failure(parseError(err, "Failed to load configurations"));
   }
-  
-  const totalCount = filtered.length;
-  const startIndex = (pageNumber - 1) * pageSize;
-  const paginatedConfigs = filtered.slice(startIndex, startIndex + pageSize);
-  
-  return successData(paginatedConfigs, {
-    configurations: paginatedConfigs,
-    totalCount: totalCount,
-  });
 }
 
 export async function getConfigurationByIdAPI(id) {
-  await delay();
-  
-  const config = MOCK_CONFIGURATIONS.find((c) => c.id === id);
-  if (!config) {
-    return failure("Configuration not found");
+  try {
+    // Backend doesn't have GET by ID endpoint, so fetch all and filter
+    const res = await api.get("/api/configurations");
+    const configurations = Array.isArray(res.data) ? res.data : [];
+    const config = configurations.find((c) => String(c.id) === String(id));
+    
+    if (!config) {
+      return failure("Configuration not found");
+    }
+    
+    return successData(config);
+  } catch (err) {
+    return failure(parseError(err, "Failed to load configuration"));
   }
-  
-  return successData(config);
 }
 
 export async function getAllCategoriesAPI() {
@@ -120,76 +91,59 @@ export async function getAllCategoriesAPI() {
 }
 
 export async function getCategoriesByConfigurationAPI(configurationId) {
-  await delay();
-  
-  const config = MOCK_CONFIGURATIONS.find((c) => c.id === configurationId);
-  if (!config) {
-    return failure("Configuration not found");
+  try {
+    const [configRes, catsRes] = await Promise.all([
+      api.get(`/api/configurations/${configurationId}`),
+      api.get("/api/productCategory/all"),
+    ]);
+
+    const config = configRes.data;
+    const allCats = Array.isArray(catsRes.data) ? catsRes.data : [];
+    const selected = allCats.filter((cat) => config?.categoryIds?.includes(cat.id));
+
+    return successData(selected);
+  } catch (err) {
+    return failure(parseError(err, "Failed to load configuration categories"));
   }
-  
-  const categories = MOCK_CATEGORIES.filter((cat) =>
-    config.categoryIds.includes(cat.id)
-  );
-  
-  return successData(categories);
 }
 
-
+// Convenience: get all configurations without pagination
 export async function getAllConfigurationsAPI() {
-  await delay();
-  return successData(MOCK_CONFIGURATIONS);
+  try {
+    const res = await api.get("/api/configurations");
+    return successData(res.data);
+  } catch (err) {
+    return failure(parseError(err, "Failed to load configurations"));
+  }
 }
 
+// Add configuration
 export async function addConfigurationAPI(payload) {
-  await delay();
-  
-  const newConfig = {
-    id: `config-${Date.now()}`,
-    ...payload,
-    createdDate: new Date().toISOString(),
-  };
-  
-  MOCK_CONFIGURATIONS.push(newConfig);
-  return successData(newConfig);
+  try {
+    const res = await api.post("/api/configurations", payload);
+    return successData(res.data);
+  } catch (err) {
+    return failure(parseError(err, "Failed to add configuration"));
+  }
 }
 
-
+// Update configuration
 export async function updateConfigurationAPI(id, payload) {
-  await delay();
-  
-  const index = MOCK_CONFIGURATIONS.findIndex((c) => c.id === id);
-  if (index === -1) {
-    return failure("Configuration not found");
+  try {
+    const res = await api.put(`/api/configurations/${id}`, payload);
+    return successData(res.data);
+  } catch (err) {
+    return failure(parseError(err, "Failed to update configuration"));
   }
-  
-  const updated = {
-    ...MOCK_CONFIGURATIONS[index],
-    ...payload,
-  };
-  
-  MOCK_CONFIGURATIONS[index] = updated;
-  return successData(updated);
 }
 
-
+// Delete configuration
 export async function deleteConfigurationAPI(id) {
-  await delay();
-  
-  const index = MOCK_CONFIGURATIONS.findIndex((c) => c.id === id);
-  if (index === -1) {
-    return failure("Configuration not found");
+  try {
+    const res = await api.delete(`/api/configurations/${id}`);
+    return successData(res.data);
+  } catch (err) {
+    // Surface dependency errors from backend if any
+    return failure(parseError(err, "Failed to delete configuration"));
   }
-  
-  const restaurantsUsingConfig = Object.values(MOCK_RESTAURANTS_CONFIG).filter(
-    (configId) => configId === id
-  );
-  
-  if (restaurantsUsingConfig.length > 0) {
-    return failure(
-      `Cannot delete this configuration. ${restaurantsUsingConfig.length} restaurant(s) are using it.`
-    );
-  }
-  
-  MOCK_CONFIGURATIONS.splice(index, 1);
-  return successData({ success: true });
 }

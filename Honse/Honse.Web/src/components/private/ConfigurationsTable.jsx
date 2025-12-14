@@ -29,7 +29,6 @@ export default function ConfigurationsTable({ configurations = [], setConfigurat
               <th className="p-4 w-12"></th>
               <th className="px-6 py-3">Name</th>
               <th className="px-6 py-3">Categories Count</th>
-              <th className="px-6 py-3">Created Date</th>
               <th className="px-6 py-3">Actions</th>
             </tr>
           </thead>
@@ -37,7 +36,7 @@ export default function ConfigurationsTable({ configurations = [], setConfigurat
           <tbody>
             {configurations.length === 0 && (
               <tr>
-                <td colSpan="5" className="text-center py-6 text-gray-500">
+                <td colSpan="4" className="text-center py-6 text-gray-500">
                   No configurations found
                 </td>
               </tr>
@@ -51,10 +50,6 @@ export default function ConfigurationsTable({ configurations = [], setConfigurat
 
                 <td className="px-6 py-3">
                   {Array.isArray(c.categoryIds) ? c.categoryIds.length : 0}
-                </td>
-
-                <td className="px-6 py-3">
-                  {c.createdDate ? new Date(c.createdDate).toLocaleDateString() : "N/A"}
                 </td>
 
                 <td className="px-6 py-3 space-x-3">
