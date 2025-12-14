@@ -282,7 +282,11 @@ async function reloadOrder() {
                 <span className="material-symbols-outlined text-gray-500 mt-0.5">home</span>
                 <div>
                   <p className="text-sm text-[#9a6c4c]">Delivery Address</p>
-                  <p className="font-medium text-[#1b130d]">{clientAddress}</p>
+                  <p className="font-medium text-[#1b130d]">
+                    {typeof clientAddress === "object" && clientAddress
+                      ? `${clientAddress.street}, ${clientAddress.city}, ${clientAddress.country} ${clientAddress.postalCode}`
+                      : clientAddress || "No address provided"}
+                  </p>
                 </div>
               </div>
             </div>
