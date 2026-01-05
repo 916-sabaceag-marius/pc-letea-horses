@@ -159,12 +159,13 @@ useEffect(() => {
             <p className="text-sm">Sales</p>
           </div>
 
-          <div
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100`}
+          <NavLink
+              to="/settings/account"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100"
           >
             <span className="material-symbols-outlined">settings</span>
             <p className="text-sm">Settings</p>
-          </div>
+          </NavLink>
         </nav>
       </div>
 

@@ -1,7 +1,9 @@
 ﻿using Honse.Global.Extensions;
 using Honse.Managers.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Honse.API.Controllers
 {
@@ -61,6 +63,27 @@ namespace Honse.API.Controllers
             }
 
             return Ok(response.Result);
+        }
+
+        [Authorize]
+        [HttpGet("me")]
+        public IActionResult Me()
+        {
+            var username =
+                User.FindFirst(ClaimTypes.GivenName)?.Value ??
+                User.FindFirst("username")?.Value ??
+                User.Identity?.Name;
+
+            var email =
+                User.FindFirst(ClaimTypes.Email)?.Value ??
+                User.FindFirst("email")?.Value;
+
+
+            return Ok(new
+            {
+                username,
+                email
+            });
         }
 
     }
