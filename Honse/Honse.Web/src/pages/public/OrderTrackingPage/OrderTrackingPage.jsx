@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getOrderDetailsAPI, cancelOrderAPI, STATUS_INFO } from "../../../services/publicOrderService";
 import { useNavigate, useParams } from "react-router";
+import * as signalR from '@microsoft/signalr'
 
 export default function OrderTrackingPage() {
   const [order, setOrder] = useState(null);
@@ -10,21 +11,55 @@ export default function OrderTrackingPage() {
   const [error, setError] = useState("");
   const { id } = useParams();
   const [minutesRemaining, setMinutesRemaining] = useState(0);
+  const [connection, setConnection] = useState(null);
+
   useEffect(() => {
-    async function loadOrder() {
-      const res = await getOrderDetailsAPI(id);
+  const newConnection = new signalR.HubConnectionBuilder()
+    .withUrl("https://localhost:2000/api/orderinghub", {
+      skipNegotiation: true,
+      transport: signalR.HttpTransportType.WebSockets,
+    })
+    .withAutomaticReconnect()
+    .build();
 
-      if (res.succeeded) {
-        setOrder(res.data);
-      } else {
-        console.error(res.errorMessage);
-        setError(res.errorMessage);
-      }
+  setConnection(newConnection);
+}, []);
 
-      setLoading(false);
-    }
+useEffect(() =>{
+        if (!connection) 
+            return;
 
-    loadOrder();
+            connection.start().then(() =>{
+                console.log("SignalR connected.");
+		
+                connection.on('PingOrderUpdated', updatedId => {
+
+                  if(updatedId === id)
+                    reloadOrder();
+                });
+              })
+            .catch(e => console.log('Connection failed: ', e))
+
+         return () => {
+    connection.stop();
+  };
+}, [connection, id]);
+
+
+async function reloadOrder() {
+  const res = await getOrderDetailsAPI(id);
+
+  if (res.succeeded) {
+    setOrder(res.data);
+  } else {
+    console.error(res.errorMessage);
+    setError(res.errorMessage);
+  }
+}
+
+  useEffect(() => {
+  setLoading(true);
+  reloadOrder().finally(() => setLoading(false));
   }, [id]);
 
   const navigate = useNavigate();
@@ -115,9 +150,12 @@ export default function OrderTrackingPage() {
               {products.map((item, i) => (
                 <li key={i} className="p-4 flex gap-4">
                   <img
-                    src={item.imgUrl || "/placeholder-food.jpg"}
+                    src={item.imgUrl || item.image || item.Image || "/placeholder-food.jpg"}
                     alt={item.name}
                     className="w-16 h-16 rounded-md object-cover"
+                    onError={(e) => {
+                      e.target.src = "/placeholder-food.jpg";
+                    }}
                   />
                   <div className="flex-1">
                     <p className="font-semibold">{item.name}</p>
@@ -194,7 +232,7 @@ export default function OrderTrackingPage() {
 
   <ul className="space-y-4">
     {statusHistory
-      .sort((a, b) => new Date(b.timeStamp) - new Date(a.timeStamp))
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
       .map((entry, index) => {
         const info = STATUS_INFO[entry.status];
         return (
@@ -209,7 +247,7 @@ export default function OrderTrackingPage() {
                 {info.label}
               </p>
               <p className="text-sm text-secondary-text-light">
-                {new Date(entry.timeStamp).toLocaleTimeString([], {
+                {new Date(entry.timestamp).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
@@ -247,7 +285,11 @@ export default function OrderTrackingPage() {
                 <span className="material-symbols-outlined text-gray-500 mt-0.5">home</span>
                 <div>
                   <p className="text-sm text-[#9a6c4c]">Delivery Address</p>
-                  <p className="font-medium text-[#1b130d]">{clientAddress}</p>
+                  <p className="font-medium text-[#1b130d]">
+                    {typeof clientAddress === "object" && clientAddress
+                      ? `${clientAddress.street}, ${clientAddress.city}, ${clientAddress.country} ${clientAddress.postalCode}`
+                      : clientAddress || "No address provided"}
+                  </p>
                 </div>
               </div>
             </div>
