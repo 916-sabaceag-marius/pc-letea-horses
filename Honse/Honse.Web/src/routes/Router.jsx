@@ -22,6 +22,7 @@ import OrderDetailsPage from '../pages/private/orders/OrderDetailsPage';
 import CheckoutPage from "../pages/public/Checkout/CheckoutPage";
 import OrderEmailConfirmationPage from "../pages/public/Checkout/OrderEmailConfirmationPage";
 import ConfirmOrderPage from '../pages/public/OrderTrackingPage/ConfirmOrderPage';
+import DashboardPage from '../pages/private/Dashboard/DashboardPage';
 export const router = createBrowserRouter([
     {
         path: "/",
@@ -186,6 +187,16 @@ export const router = createBrowserRouter([
                     </AuthenticatedRoute>
                 ),
             },
+
+            {
+                path: "/dashboard",
+                element: (
+                    //<AuthenticatedRoute redirectPage="/public/login" > 
+                        <DashboardPage />
+                   //</AuthenticatedRoute> 
+                ),
+            },
+
 
             // Restaurants page: /restaurants
 
