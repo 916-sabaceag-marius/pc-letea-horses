@@ -1,4 +1,5 @@
-﻿using Honse.Global.Extensions;
+﻿using System.Security.Claims;
+using Honse.Global.Extensions;
 using Honse.Managers.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -63,6 +64,58 @@ namespace Honse.API.Controllers
             }
 
             return Ok(response.Result);
+        }
+        
+        [HttpPut("me")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                string errorMessage = ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .First()
+                    .ErrorMessage;
+                return BadRequest(new { errorMessage });
+            }
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var response = await userManager.UpdateProfile(userId, request).WithTryCatch();
+
+            if (!response.IsSuccessfull)
+                return BadRequest(new { errorMessage = response.Exception.Message });
+
+            return Ok(new { userName = response.Result.UserName, email = response.Result.Email });
+        }
+
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                string errorMessage = ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .First()
+                    .ErrorMessage;
+                return BadRequest(new { errorMessage });
+            }
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var response = await userManager.ChangePassword(userId, request).WithTryCatch();
+
+            if (!response.IsSuccessfull)
+                return BadRequest(new { errorMessage = response.Exception.Message });
+
+            return Ok(new { message = "Password changed successfully" });
         }
 
         [Authorize]
