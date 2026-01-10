@@ -81,6 +81,39 @@
     gap: 6px;
 }
 
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-icon .input {
+    padding-right: 44px;
+}
+
+.icon-btn {
+    position: absolute;
+    right: 10px;
+    background: transparent;
+    border: 0;
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: inherit;
+}
+
+.icon-btn:focus {
+    outline: none;
+}
+
+.icon-btn:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
 .label{
     display:block;
     font-size: 13px;

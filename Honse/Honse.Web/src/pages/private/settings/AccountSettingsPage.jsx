@@ -1,11 +1,89 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
+import { useAuth } from "../../../contexts/AuthContext.js";
 import "./AccountSettingsPage.css";
 
 const RAW_BASE = process.env.REACT_APP_API_URL || "https://localhost:2000";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const usernameRegex = /^[a-zA-Z0-9._]+$/;
+
+function getApiErrorMessage(err, fallback) {
+    const data = err?.response?.data;
+    if (data?.errorMessage) return data.errorMessage;
+    if (typeof data === "string" && data.trim()) return data;
+    return fallback;
+}
+
+function mapBackendErrorsToFields(errorMessage) {
+    const fieldErrors = {
+        username: "",
+        email: "",
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+    };
+
+    if (!errorMessage || typeof errorMessage !== "string") return fieldErrors;
+
+    const parts = errorMessage
+        .split(/;|\n/g)
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+    for (const p of parts) {
+        const lower = p.toLowerCase();
+
+        if (lower.includes("username")) {
+            fieldErrors.username = fieldErrors.username ? `${fieldErrors.username} ${p}` : p;
+            continue;
+        }
+
+        if (lower.includes("email")) {
+            fieldErrors.email = fieldErrors.email ? `${fieldErrors.email} ${p}` : p;
+            continue;
+        }
+
+        if (lower.includes("current password")) {
+            fieldErrors.currentPassword = fieldErrors.currentPassword
+                ? `${fieldErrors.currentPassword} ${p}`
+                : p;
+            continue;
+        }
+
+        if (lower.includes("new password")) {
+            fieldErrors.newPassword = fieldErrors.newPassword ? `${fieldErrors.newPassword} ${p}` : p;
+            continue;
+        }
+
+        if (lower.includes("confirm") || lower.includes("match")) {
+            fieldErrors.confirmNewPassword = fieldErrors.confirmNewPassword
+                ? `${fieldErrors.confirmNewPassword} ${p}`
+                : p;
+            continue;
+        }
+    }
+
+    return fieldErrors;
+}
+
+function EyeIcon({ open }) {
+    return open ? (
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+                fill="currentColor"
+                d="M2.1 3.51 3.51 2.1 21.9 20.49 20.49 21.9l-3.02-3.02c-1.63.74-3.45 1.12-5.47 1.12C6.5 20 2.16 16.36 1 12c.53-1.99 1.73-3.78 3.41-5.19L2.1 3.51Zm8.3 8.3 3.79 3.79c-.55.25-1.16.4-1.79.4-2.21 0-4-1.79-4-4 0-.63.15-1.24.4-1.79ZM12 4c5.5 0 9.84 3.64 11 8-.5 1.9-1.6 3.62-3.12 5.01l-2.18-2.18c.19-.53.3-1.11.3-1.73 0-2.76-2.24-5-5-5-.62 0-1.2.11-1.73.3L9.3 6.43C10.18 6.15 11.08 4 12 4Zm0 6c1.66 0 3 1.34 3 3 0 .3-.05.58-.13.85l-3.72-3.72c.27-.08.55-.13.85-.13Z"
+            />
+        </svg>
+    ) : (
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+                fill="currentColor"
+                d="M12 4c5.5 0 9.84 3.64 11 8-1.16 4.36-5.5 8-11 8S2.16 16.36 1 12c1.16-4.36 5.5-8 11-8Zm0 14c3.86 0 7.17-2.33 8.4-6-1.23-3.67-4.54-6-8.4-6S4.83 8.33 3.6 12c1.23 3.67 4.54 6 8.4 6Zm0-10a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"
+            />
+        </svg>
+    );
+}
 
 export default function AccountSettingsPage() {
     const hydratedRef = useRef(false);
@@ -35,6 +113,14 @@ export default function AccountSettingsPage() {
         newPassword: "",
         confirmNewPassword: "",
     });
+
+    const [showPw, setShowPw] = useState({
+        current: false,
+        next: false,
+        confirm: false,
+    });
+
+    const { setAuthUsername } = useAuth();
 
     const setErrorBanner = (message) => setStatus({ type: "error", message });
     const setSuccessBanner = (message) => setStatus({ type: "success", message });
@@ -99,6 +185,15 @@ export default function AccountSettingsPage() {
         }));
     }, [passwordErrors]);
 
+    function handleUnauthorized(err) {
+        if (err?.response?.status === 401) {
+            localStorage.removeItem("token");
+            setErrorBanner("Session expired. Please log in again.");
+            return true;
+        }
+        return false;
+    }
+
     useEffect(() => {
         if (hydratedRef.current) return;
 
@@ -119,14 +214,17 @@ export default function AccountSettingsPage() {
                 const me = res.data;
 
                 setProfile({
-                    username: (me.username ?? me.userName ?? me.UserName ?? "").trim(),
-                    email: (me.email ?? me.Email ?? "").trim(),
+                    username: (me.username ?? "").trim(),
+                    email: (me.email ?? "").trim(),
                 });
 
                 hydratedRef.current = true;
-            } catch (e) {
-                console.error("ME ERROR:", e?.response?.status, e?.response?.data, e?.message);
-                setErrorBanner("Failed to load your account details.");
+            } catch (err) {
+                if (handleUnauthorized(err)) return;
+
+                const msg = getApiErrorMessage(err, "Failed to load your account details.");
+                setErrorBanner(msg);
+                console.error("ME ERROR:", err?.response?.status, err?.response?.data, err?.message);
             } finally {
                 setLoading((s) => ({ ...s, initial: false }));
             }
@@ -148,15 +246,43 @@ export default function AccountSettingsPage() {
 
         setLoading((s) => ({ ...s, profile: true }));
         try {
-            // TODO: wire backend PUT
-            // const token = localStorage.getItem("token");
-            // await axios.put(`${RAW_BASE}/api/users/me`, profile, {
-            //   headers: { Authorization: `Bearer ${token}` },
-            // });
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setErrorBanner("No token found. Please log in again.");
+                return;
+            }
+
+            const res = await axios.put(
+                `${RAW_BASE}/api/users/me`,
+                {
+                    UserName: profile.username.trim(),
+                    Email: profile.email.trim(),
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            const updated = res.data || {};
+            setProfile({
+                username: (updated.userName ?? updated.username ?? profile.username).trim(),
+                email: (updated.email ?? profile.email).trim(),
+            });
 
             setSuccessBanner("Profile updated successfully.");
-        } catch {
-            setErrorBanner("Failed to update profile.");
+            setAuthUsername(profile.username);
+        } catch (err) {
+            if (handleUnauthorized(err)) return;
+
+            const msg = getApiErrorMessage(err, "Failed to update profile.");
+            setErrorBanner(msg);
+
+            const mapped = mapBackendErrorsToFields(msg);
+            if (mapped.username || mapped.email) {
+                setErrors((prev) => ({
+                    ...prev,
+                    username: mapped.username || prev.username,
+                    email: mapped.email || prev.email,
+                }));
+            }
         } finally {
             setLoading((s) => ({ ...s, profile: false }));
         }
@@ -178,12 +304,21 @@ export default function AccountSettingsPage() {
 
         setLoading((s) => ({ ...s, password: true }));
         try {
-            // TODO: wire backend endpoint
-            // const token = localStorage.getItem("token");
-            // await axios.post(`${RAW_BASE}/api/users/change-password`, {
-            //   currentPassword: passwords.currentPassword,
-            //   newPassword: passwords.newPassword,
-            // }, { headers: { Authorization: `Bearer ${token}` } });
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setErrorBanner("No token found. Please log in again.");
+                return;
+            }
+
+            const res = await axios.post(
+                `${RAW_BASE}/api/users/change-password`,
+                {
+                    CurrentPassword: passwords.currentPassword,
+                    NewPassword: passwords.newPassword,
+                    ConfirmNewPassword: passwords.confirmNewPassword,
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
 
             setPasswords({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
             setTouched((t) => ({
@@ -193,9 +328,22 @@ export default function AccountSettingsPage() {
                 confirmNewPassword: false,
             }));
 
-            setSuccessBanner("Password updated successfully.");
-        } catch {
-            setErrorBanner("Failed to change password.");
+            setSuccessBanner(res.data?.message || "Password updated successfully.");
+        } catch (err) {
+            if (handleUnauthorized(err)) return;
+
+            const msg = getApiErrorMessage(err, "Failed to change password.");
+            setErrorBanner(msg);
+
+            const mapped = mapBackendErrorsToFields(msg);
+            if (mapped.currentPassword || mapped.newPassword || mapped.confirmNewPassword) {
+                setErrors((prev) => ({
+                    ...prev,
+                    currentPassword: mapped.currentPassword || prev.currentPassword,
+                    newPassword: mapped.newPassword || prev.newPassword,
+                    confirmNewPassword: mapped.confirmNewPassword || prev.confirmNewPassword,
+                }));
+            }
         } finally {
             setLoading((s) => ({ ...s, password: false }));
         }
@@ -276,48 +424,81 @@ export default function AccountSettingsPage() {
                         <form onSubmit={handleChangePassword} className="form-grid" noValidate>
                             <div className="input-row">
                                 <label className="label">Current password</label>
-                                <input
-                                    type="password"
-                                    className={[
-                                        "input",
-                                        touched.currentPassword && errors.currentPassword ? "input-invalid" : "",
-                                    ].join(" ")}
-                                    value={passwords.currentPassword}
-                                    onChange={(e) => setPasswords((p) => ({ ...p, currentPassword: e.target.value }))}
-                                    onBlur={() => markTouched("currentPassword")}
-                                    autoComplete="current-password"
-                                />
-                                {touched.currentPassword && errors.currentPassword && (
-                                    <div className="field-error">{errors.currentPassword}</div>
-                                )}
+
+                                <div className="input-with-icon">
+                                    <input
+                                        type={showPw.current ? "text" : "password"}
+                                        className={["input", touched.currentPassword && errors.currentPassword ? "input-invalid" : ""].join(" ")}
+                                        value={passwords.currentPassword}
+                                        onChange={(e) => setPasswords((p) => ({...p, currentPassword: e.target.value}))}
+                                        onBlur={() => markTouched("currentPassword")}
+                                        autoComplete="current-password"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="icon-btn"
+                                        aria-label={showPw.current ? "Hide current password" : "Show current password"}
+                                        onClick={() => setShowPw((s) => ({...s, current: !s.current}))}
+                                    >
+                                        <EyeIcon open={showPw.current}/>
+                                    </button>
+                                </div>
+
+                                {touched.currentPassword && errors.currentPassword &&
+                                    <div className="field-error">{errors.currentPassword}</div>}
                             </div>
 
                             <div className="input-row">
                                 <label className="label">New password</label>
-                                <input
-                                    type="password"
-                                    className={["input", touched.newPassword && errors.newPassword ? "input-invalid" : ""].join(" ")}
-                                    value={passwords.newPassword}
-                                    onChange={(e) => setPasswords((p) => ({ ...p, newPassword: e.target.value }))}
-                                    onBlur={() => markTouched("newPassword")}
-                                    autoComplete="new-password"
-                                />
-                                {touched.newPassword && errors.newPassword && <div className="field-error">{errors.newPassword}</div>}
+
+                                <div className="input-with-icon">
+                                    <input
+                                        type={showPw.next ? "text" : "password"}
+                                        className={["input", touched.newPassword && errors.newPassword ? "input-invalid" : ""].join(" ")}
+                                        value={passwords.newPassword}
+                                        onChange={(e) => setPasswords((p) => ({...p, newPassword: e.target.value}))}
+                                        onBlur={() => markTouched("newPassword")}
+                                        autoComplete="new-password"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="icon-btn"
+                                        aria-label={showPw.next ? "Hide new password" : "Show new password"}
+                                        onClick={() => setShowPw((s) => ({...s, next: !s.next}))}
+                                    >
+                                        <EyeIcon open={showPw.next}/>
+                                    </button>
+                                </div>
+
+                                {touched.newPassword && errors.newPassword &&
+                                    <div className="field-error">{errors.newPassword}</div>}
                             </div>
 
                             <div className="input-row">
                                 <label className="label">Confirm new password</label>
-                                <input
-                                    type="password"
-                                    className={[
-                                        "input",
-                                        touched.confirmNewPassword && errors.confirmNewPassword ? "input-invalid" : "",
-                                    ].join(" ")}
-                                    value={passwords.confirmNewPassword}
-                                    onChange={(e) => setPasswords((p) => ({ ...p, confirmNewPassword: e.target.value }))}
-                                    onBlur={() => markTouched("confirmNewPassword")}
-                                    autoComplete="new-password"
-                                />
+
+                                <div className="input-with-icon">
+                                    <input
+                                        type={showPw.confirm ? "text" : "password"}
+                                        className={["input", touched.confirmNewPassword && errors.confirmNewPassword ? "input-invalid" : ""].join(" ")}
+                                        value={passwords.confirmNewPassword}
+                                        onChange={(e) => setPasswords((p) => ({
+                                            ...p,
+                                            confirmNewPassword: e.target.value
+                                        }))}
+                                        onBlur={() => markTouched("confirmNewPassword")}
+                                        autoComplete="new-password"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="icon-btn"
+                                        aria-label={showPw.confirm ? "Hide confirm password" : "Show confirm password"}
+                                        onClick={() => setShowPw((s) => ({...s, confirm: !s.confirm}))}
+                                    >
+                                        <EyeIcon open={showPw.confirm}/>
+                                    </button>
+                                </div>
+
                                 {touched.confirmNewPassword && errors.confirmNewPassword && (
                                     <div className="field-error">{errors.confirmNewPassword}</div>
                                 )}
