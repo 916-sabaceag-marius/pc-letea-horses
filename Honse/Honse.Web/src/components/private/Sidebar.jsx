@@ -160,7 +160,7 @@ useEffect(() => {
             }
           >
             <span className="material-symbols-outlined">bar_chart</span>
-            <p className="text-sm">Sales Data</p>
+            <p className="text-sm">Sales</p>
           </NavLink>
 
           <div

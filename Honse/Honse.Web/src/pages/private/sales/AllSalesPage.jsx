@@ -180,7 +180,7 @@ export default function AllSalesPage() {
                 <div className="max-w-7xl mx-auto">
                     {/* Header with Export Button */}
                     <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-3xl font-bold text-gray-900">Sales Data</h1>
+                        <h1 className="text-3xl font-bold text-gray-900">Sales</h1>
                         <button
                             onClick={handleExportData}
                             disabled={orders.length === 0}
@@ -337,9 +337,6 @@ export default function AllSalesPage() {
                                             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                                 Order Status
                                             </th>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                Actions
-                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-200">
@@ -373,17 +370,6 @@ export default function AllSalesPage() {
                                                     >
                                                         {getStatusLabel(order.status)}
                                                     </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleOrderClick(order.id);
-                                                        }}
-                                                        className="text-blue-600 hover:text-blue-800"
-                                                    >
-                                                        <span className="material-symbols-outlined">visibility</span>
-                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}
