@@ -62,28 +62,28 @@ export const router = createBrowserRouter([
 
             { path: "/login",
                 element: (
-                    <UnauthenticatedRoute redirectPage='/public/restaurants'>
+                    <UnauthenticatedRoute redirectPage='/dashboard'>
                         <LoginPage />
                     </UnauthenticatedRoute>
                 )
             },
             { path: "/public/login",
                 element: (
-                    <UnauthenticatedRoute redirectPage='/public/restaurants'>
+                    <UnauthenticatedRoute redirectPage='/dashboard'>
                         <LoginPage />
                     </UnauthenticatedRoute>
                 )
             },
             { path: "/register",
                 element: (
-                    <UnauthenticatedRoute redirectPage='/public/restaurants'>
+                    <UnauthenticatedRoute redirectPage='/dashboard'>
                         <RegisterPage />
                     </UnauthenticatedRoute>
                 )
             },
             { path: "/public/register",
                 element: (
-                    <UnauthenticatedRoute redirectPage='/public/restaurants'>
+                    <UnauthenticatedRoute redirectPage='/dashboard'>
                         <RegisterPage />
                     </UnauthenticatedRoute>
                 )
@@ -209,9 +209,9 @@ export const router = createBrowserRouter([
             {
                 path: "/dashboard",
                 element: (
-                    //<AuthenticatedRoute redirectPage="/public/login" > 
+                    <AuthenticatedRoute redirectPage="/public/login" > 
                         <DashboardPage />
-                   //</AuthenticatedRoute> 
+                   </AuthenticatedRoute> 
                 ),
             },
 
