@@ -18,6 +18,9 @@ import AddConfigurationPage from '../pages/private/configurations/AddConfigurati
 import OrderTrackingPage from '../pages/public/OrderTrackingPage/OrderTrackingPage';
 import AllOrdersPage from '../pages/private/orders/AllOrdersPage';
 import OrderDetailsPage from '../pages/private/orders/OrderDetailsPage';
+import AccountSettingsPage from "../pages/private/settings/AccountSettingsPage";
+import AllSalesPage from '../pages/private/sales/AllSalesPage';
+import SalesDetailsPage from '../pages/private/sales/SalesDetailsPage';
 
 import CheckoutPage from "../pages/public/Checkout/CheckoutPage";
 import OrderEmailConfirmationPage from "../pages/public/Checkout/OrderEmailConfirmationPage";
@@ -198,6 +201,34 @@ export const router = createBrowserRouter([
                 element: (
                     <AuthenticatedRoute redirectPage="/public/login">
                         <OrderDetailsPage />
+                    </AuthenticatedRoute>
+                ),
+            },
+
+            // Account settings page
+            {
+                path: "/settings/account",
+                element: (
+                    <AuthenticatedRoute redirectPage="/public/login">
+                        <AccountSettingsPage />
+                   </AuthenticatedRoute>
+                ),
+            },
+            // Sales management routes
+            {
+                path: "/sales",
+                element: (
+                    <AuthenticatedRoute redirectPage="/public/login">
+                        <AllSalesPage />
+                    </AuthenticatedRoute>
+                ),
+            },
+            
+            {
+                path: "/sales/:orderId",
+                element: (
+                    <AuthenticatedRoute redirectPage="/public/login">
+                        <SalesDetailsPage />
                     </AuthenticatedRoute>
                 ),
             },
