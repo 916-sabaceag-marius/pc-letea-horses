@@ -50,6 +50,10 @@ export default function OrderTrackingPage() {
     const res = await getOrderDetailsAPI(id);
 
     if (res.succeeded) {
+      
+      res.data.preparationTime += "Z";
+      res.data.deliveryTime += "Z";
+
       setOrder(res.data);
     } else {
       console.error(res.errorMessage);
@@ -85,17 +89,16 @@ export default function OrderTrackingPage() {
 
   useEffect(() => {
     if (!order) return;
-    const deliveryTime = new Date(order.preparationTime);
+    const deliveryTime = new Date(order.orderStatus === 2 ? order.deliveryTime : order.preparationTime);
     deliveryTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     setMinutesRemaining(Math.max(0, Math.round((deliveryTime - new Date()) / 60000)));
 
-    const interval = setInterval(() => {
-      const newMinutes = Math.max(0, Math.round((deliveryTime - new Date()) / 60000));
-      setMinutesRemaining(newMinutes);
-    }, 60_000);
-
-    return () => clearInterval(interval);
-  }, [order]);
+  const interval = setInterval(() => {
+    const newMinutes = Math.max(0, Math.round((deliveryTime - new Date()) / 60000));
+    setMinutesRemaining(newMinutes);
+  }, 60_000);
+  return () => clearInterval(interval);
+}, [order]);
 
   if (loading) return <p className="p-10 text-lg text-gray-500">Loading...</p>;
   if (!order) return <p className="p-10 text-lg text-red-500">Order not found.</p>;
@@ -110,20 +113,24 @@ export default function OrderTrackingPage() {
   const total = subtotal + deliveryFee;
   const currentStatus = order.orderStatus;
   const statusHistory = order.statusHistory ?? [];
-  const deliveryTime = new Date(order.preparationTime);
+  const deliveryTime = new Date(order.orderStatus === 2 ? order.deliveryTime : order.preparationTime);
+  console.log(deliveryTime);
   deliveryTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  const statusStages = ["confirmed", "preparing", "out for delivery", "delivered"];
+  const statusStages = ["confirmed", "preparing", "out for delivery", "delivered", "cancelled"];
   const progressIndexMap = {
     0: 0,
     1: 1,
     2: 2,
     3: 3,
-    [-1]: 0
+    4: 4
   };
+
 
   const statusIndex = progressIndexMap[currentStatus] ?? 0;
   const progressPercent = ((statusIndex + 1) / 4) * 100;
   const statusLabel = statusStages[statusIndex];
+
+console.log(currentStatus, statusLabel);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -131,7 +138,7 @@ export default function OrderTrackingPage() {
       {/* Heading */}
       <div className="pt-6 pb-8">
         <h1 className="text-4xl font-extrabold">
-          Your order is <span className="text-orange-500">{statusLabel}</span>!
+          Your order is <span className={currentStatus === 4 ? "text-red-500" : "text-orange-500"}>{statusLabel}</span>!
         </h1>
         <p className="text-2xl text-gray-600">Order Number: {orderNo}</p>
         {error && <p className="text-red-500 mb-4">{error}</p>}
@@ -181,7 +188,8 @@ export default function OrderTrackingPage() {
           </div>
 
           {/* Progress Bar */}
-          <div>
+          {currentStatus !== 4 && (
+            <div>
             <p className="text-lg font-bold">{statusLabel}</p>
 
             <div className="w-full bg-blue-100 rounded-lg h-3 mt-2">
@@ -202,7 +210,9 @@ export default function OrderTrackingPage() {
               ))}
             </div>
           </div>
-          {order.status !== -1 && order.status !== 3 && (
+          )}
+
+          { currentStatus <= 1 && (
             <button
               onClick={() => setIsCancelModalOpen(true)}
               className="mt-4 inline-flex px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-bold text-sm rounded-lg mx-auto"
@@ -220,12 +230,13 @@ export default function OrderTrackingPage() {
           <div className="bg-white p-6 rounded-xl border border-[#e7d9cf] shadow-sm">
             <h2 className="text-lg font-bold mb-1">Estimated Delivery</h2>
 
-            {order.orderStatus === 0 ? (
+            { order.orderStatus === 0 ? (
                <p className="text-3xl font-black text-[#3b82f6]">
                 Waiting for your order to be accepted
               </p>
-            ) : (
-              <>
+            ) : currentStatus === 4 ? <p className="text-4xl font-black text-[#3b82f6]">{"The order was cancelled"}</p> :
+            currentStatus === 3 ? <p className="text-3xl font-black text-[#3b82f6]">{"The order arrived. Enjoy your meal!"}</p> :
+              <>    
                 <p className="text-4xl font-black text-[#3b82f6]">
                   {deliveryTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </p>
@@ -233,7 +244,8 @@ export default function OrderTrackingPage() {
                   Arriving in {minutesRemaining} minutes
                 </p>
               </>
-            )}
+
+            }
           </div>
 
 
@@ -242,39 +254,40 @@ export default function OrderTrackingPage() {
               Order History
             </h2>
 
-            <ul className="space-y-4">
-              {statusHistory
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                .map((entry, index) => {
-                  const info = STATUS_INFO[entry.status];
-                  return (
-                    <li key={index} className="flex items-start gap-4">
-                      <div className="w-6 h-6 flex items-center justify-center rounded-full bg-orange-500 text-white mt-1">
-                        <span className="material-symbols-outlined text-base ">
-                          {info.icon}
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-text-light">
-                          {info.label}
-                        </p>
-                        <p className="text-sm text-secondary-text-light">
-                          {new Date(entry.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                      </div>
-                    </li>
-                  );
+  <ul className="space-y-4">
+    { statusHistory &&
+    statusHistory
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .map((entry, index) => {
+        const info = STATUS_INFO[entry.status];
+        return (
+          <li key={index} className="flex items-start gap-4">
+            <div className="w-6 h-6 flex items-center justify-center rounded bg-orange-500 text-white mt-1">
+              <span className="material-symbols-outlined text-base ">
+                {info.icon}
+              </span>
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-text-light">
+                {info.label}
+              </p>
+              <p className="text-sm text-secondary-text-light">
+                {new Date(entry.timestamp).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
                 })}
-            </ul>
-          </div>
+              </p>
+            </div>
+          </li>
+        );
+      })}
+  </ul>
+</div>
 
           {/* Customer Details */}
           <div className="rounded-xl border border-gray-200/50 bg-white shadow-sm">
             <h2 className="text-[#1b130d] text-lg font-bold p-4 border-b border-gray-200/50">
-              Customer Details
+              Your Details
             </h2>
             <div className="p-4 space-y-4">
               <div className="flex items-center gap-4">

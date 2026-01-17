@@ -22,6 +22,7 @@ export default function OrderDetailsPage() {
     const [processing, setProcessing] = useState(false);
     const [restaurantId, setRestaurantId] = useState(localStorage.getItem("restaurantId"));
     const [connection, setConnection] = useState(null);
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
     const fetchOrderDetails = useCallback(async () => {
         if (!restaurantId || !orderId) return;
@@ -127,14 +128,15 @@ export default function OrderDetailsPage() {
     };
 
     const handleCancel = async () => {
-        if (!window.confirm("Are you sure you want to cancel this order?")) return;
         await cancelOrderAPI(order.id);
+
+        setIsCancelModalOpen(false);
     };
 
     if (loading) {
         return (
             <div className="flex min-h-screen bg-gray-50">
-                <Sidebar onRestaurantChange={setRestaurantId} />
+                <Sidebar onRestaurantChange={setRestaurantId}/>
                 <main className="flex-1 p-8">
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
@@ -150,7 +152,7 @@ export default function OrderDetailsPage() {
     if (error || !order) {
         return (
             <div className="flex min-h-screen bg-gray-50">
-                <Sidebar onRestaurantChange={setRestaurantId} />
+                <Sidebar onRestaurantChange={(id) => {navigate("/orders")}} />
                 <main className="flex-1 p-8">
                     <div className="max-w-6xl mx-auto">
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
@@ -168,12 +170,13 @@ export default function OrderDetailsPage() {
         );
     }
 
-    const total = order.total || (order.subtotal + order.tax + order.deliveryFee);
+    const total = (order.subtotal + order.tax + order.deliveryFee);
+
     const nextStatusInfo = getNextStatus(order.status);
 
     return (
         <div className="flex min-h-screen bg-gray-50">
-            <Sidebar onRestaurantChange={setRestaurantId} />
+            <Sidebar onRestaurantChange={(id) => {navigate("/orders")}} />
             <main className="flex-1 p-8">
                 <div className="max-w-6xl mx-auto">
                     {/* Header */}
@@ -220,13 +223,15 @@ export default function OrderDetailsPage() {
                                     {processing ? "Processing..." : nextStatusInfo.label}
                                 </button>
                             )}
-                            <button
-                                onClick={handleCancel}
+                            {
+                                order.status <= 1 && (<button
+                                onClick={() => setIsCancelModalOpen(true)}
                                 disabled={processing}
                                 className="px-6 py-3 bg-white border border-red-300 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 font-medium"
                             >
                                 Cancel Order
-                            </button>
+                            </button>)
+                            }
                         </div>
                     )}
 
@@ -344,15 +349,6 @@ export default function OrderDetailsPage() {
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
-                                        <span className="material-symbols-outlined text-gray-400">phone</span>
-                                        <div>
-                                            <p className="text-sm text-gray-500">Contact</p>
-                                            <p className="font-medium">
-                                                {order.customer.phone || "No phone provided"}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start gap-3">
                                         <span className="material-symbols-outlined text-gray-400">location_on</span>
                                         <div>
                                             <p className="text-sm text-gray-500">Delivery Address</p>
@@ -374,16 +370,39 @@ export default function OrderDetailsPage() {
                                         <span className="text-sm text-gray-500">Order Time</span>
                                         <span className="font-medium">{order.orderTime}</span>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-sm text-gray-500">Time Ago</span>
-                                        <span className="font-medium">{order.timeAgo}</span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </main>
+
+            {isCancelModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-xl p-6 w-96 shadow-lg">
+                    <h2 className="text-xl font-bold mb-4">Confirm Cancellation</h2>
+                    <p className="mb-6">
+                    Are you sure you want to cancel this order?
+                    </p>
+                    <div className="flex justify-end gap-4">
+                    <button
+                        onClick={() => setIsCancelModalOpen(false)}
+                        className="px-4 py-2 rounded-lg border border-gray-300"
+                    >
+                        Close
+                    </button>
+                    <button
+                        onClick={handleCancel}
+                        className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+                        disabled={processing}
+                    >
+                        {processing ? "Cancelling..." : "Confirm"}
+                    </button>
+                    </div>
+                </div>
+                </div>
+            )}
+
         </div>
     );
 }
